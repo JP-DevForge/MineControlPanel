@@ -1,0 +1,21 @@
+export async function getServers() {
+  const response = await fetch("/api/servers");
+
+  if (!response.ok) {
+    return [];
+  }
+
+  return await response.json();
+}
+
+export async function saveServer(server) {
+  const response = await fetch("/api/servers", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(server)
+  });
+
+  return await response.json();
+}

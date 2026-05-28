@@ -1,0 +1,54 @@
+<div class="ventana-topbar">
+  <button id="back-home" class="boton-volver">
+    ←
+  </button>
+</div>
+
+<h1>Añadir servidor local</h1>
+
+<p class="subtitulo">
+  Registra una carpeta Minecraft existente
+</p>
+
+<form id="add-local-server-form" class="formulario">
+  <label>
+    Nombre
+    <input id="local-server-name" type="text" required>
+  </label>
+
+  <label>
+    Ruta de carpeta
+    <input
+      id="local-server-path"
+      type="text"
+      placeholder="/home/usuario/servidores/survival"
+      required
+    >
+  </label>
+
+  <label>
+    Archivo .jar
+    <input
+      id="local-server-jar"
+      type="text"
+      placeholder="server.jar"
+      required
+    >
+  </label>
+
+  <label>
+    Puerto Minecraft
+    <input
+      id="local-server-port"
+      type="number"
+      value="25565"
+      required
+    >
+  </label>
+
+  <div class="botones">
+    <button type="submit" class="boton hover">
+      Guardar
+    </button>
+  </div>
+</form>

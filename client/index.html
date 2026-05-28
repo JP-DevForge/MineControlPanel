@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MineControlPanel</title>
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/transition.css">
+  <link rel="stylesheet" href="/css/index.css">
+</head>
+
+<body>
+  <main class="server-selector">
+
+    <section class="ventana">
+
+      <h1>MineControlPanel</h1>
+
+      <p class="subtitulo">
+        Selecciona un servidor para administrar
+      </p>
+
+      <div id="servers-list" class="servers-list"></div>
+
+      <div class="botones">
+
+        <button id="open-add-server" class="boton">
+          + Añadir servidor
+        </button>
+
+        <button id="open-create-server" class="boton">
+          + Crear servidor
+        </button>
+
+      </div>
+
+    </section>
+
+    <section id="add-server-modal" class="modal hidden">
+
+      <form id="add-server-form" class="modal-card">
+
+        <h2>Añadir servidor</h2>
+
+        <label>
+          Nombre
+          <input id="server-name" type="text" placeholder="Mi servidor" required>
+        </label>
+
+        <label>
+          Host / IP
+          <input id="server-host" type="text" placeholder="localhost" value="localhost" required>
+        </label>
+
+        <label>
+          Puerto del panel
+          <input id="server-port" type="number" placeholder="3000" value="3000" required>
+        </label>
+
+        <label>
+          Protocolo
+          <select id="server-protocol">
+            <option value="http">HTTP</option>
+            <option value="https">HTTPS</option>
+          </select>
+        </label>
+
+        <label>
+          Usuario
+          <input id="server-user" type="text" placeholder="admin" value="admin" required>
+        </label>
+
+        <label>
+          Contraseña
+          <input id="server-password" type="password" placeholder="Contraseña" required>
+        </label>
+
+        <div class="modal-actions">
+
+          <button type="submit" class="boton hover">
+            Guardar
+          </button>
+
+          <button type="button" id="close-add-server" class="boton">
+            Cancelar
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </main>
+  <script type="module" src="/js/index/main.js"></script>
+</body>
+
+</html>

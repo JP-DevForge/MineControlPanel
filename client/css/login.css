@@ -1,0 +1,133 @@
+/* Reset y base */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    font-size: 1.6rem;
+    background: linear-gradient(to left, #0f3460 0%, #16213e 50%, #1a3a52 100%);
+    color: antiquewhite;
+}
+
+h1, h2 {
+    margin: 0.5rem 0;
+    text-align: center;
+    color: #00d4ff;
+    text-shadow: 0 0 0.4rem #00d4ff;
+}
+
+/* Header y Footer */
+header, footer {
+    background: linear-gradient(to right, #0f3460 0%, #16213e 50%, #1a3a52 100%);
+    text-align: center;
+    color: #00d4ff;
+    padding: 1rem 0;
+}
+
+footer {
+    border-top: 1px solid #00d4ff;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+/* Main y article */
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+article {
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 12px;
+    border: 1px solid #00d4ff;
+    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.3);
+    backdrop-filter: blur(4px);
+}
+
+article h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #00d4ff;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    font-size: 1rem;
+}
+
+input::placeholder {
+    color: #ccc;
+}
+
+/* Botón */
+.boton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.boton button {
+    cursor: url("../img/minecraft.cur"), auto;
+    background: linear-gradient(135deg, #16213e 0%, #1a3a52 100%);
+    color: #ffffff;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    transition: 0.25s ease;
+    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.2);
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.boton button:hover {
+    box-shadow: 0 0 1.5rem #00d4ff;
+    transform: translateY(-3px);
+}
+
+.boton button div {
+    text-align: center;
+}
+
+.boton .icono {
+    font-size: 2rem;
+    margin: 0;
+    line-height: 1;
+    text-shadow: 0 0 0.8rem #00d4ff;
+}
+
+/* Media Queries para mobile */
+@media (max-width: 768px) {
+    article {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+    h2 {
+        font-size: 1.8rem;
+    }
+    .boton button {
+        width: 100%;
+        padding: 1rem 0;
+    }
+}

@@ -1,0 +1,27 @@
+<main>
+    <div class="bar">
+        <button onclick="updatePlayers()">🔃</button> <label>
+            Filtrar:
+            <input id="filter" type="search" placeholder="Buscar jugador..." autocomplete="off" />
+        </label>
+        <span id="count"></span>
+    </div>
+    <table class="players" aria-label="Listado de jugadores">
+        <thead>
+            <tr>
+                <th>skin</th>
+                <th>Jugador</th>
+                <th>Modo de Juego</th>
+                <th>Rango</th>
+                <th>Mundo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr>
+                <td colspan="6" class="muted">Cargando...</td>
+            </tr>
+        </tbody>
+    </table>
+
+</main>

@@ -1,0 +1,359 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  color: white;
+  font-family: Arial, sans-serif;
+
+  background:
+    radial-gradient(circle at top,
+      #0f3460 0%,
+      #1a1a2e 45%,
+      #0b0b16 100%);
+}
+
+.server-selector {
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1.5rem;
+
+  overflow: hidden;
+}
+
+.ventana {
+    width: 80%;
+    min-height: 70vh;
+
+    overflow: visible;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 3rem;
+
+    border-radius: 24px;
+
+    background: rgba(0, 0, 0, 0.85);
+
+    border: 2px solid #00d4ff;
+
+    box-shadow:
+        0 0 20px rgba(0, 212, 255, 0.5),
+        inset 0 0 20px rgba(0, 212, 255, 0.15);
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+}
+.ventana *{
+    overflow-x: hidden;
+    overflow-y: auto;}
+.ventana h1 {
+  margin: 0;
+
+  color: #00d4ff;
+
+  text-align: center;
+  font-size: 3rem;
+
+  text-shadow: 0 0 0.5rem #00d4ff;
+}
+
+.subtitulo {
+  margin-bottom: 2rem;
+
+  color: #bdefff;
+
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.servers-list {
+  display: grid;
+  gap: 1rem;
+
+  max-height: 45vh;
+
+  margin-bottom: 2rem;
+  padding-right: 0.5rem;
+
+  overflow-y: auto;
+}
+
+.server-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  padding: 1rem;
+
+  border-radius: 12px;
+  border: 1px solid #00d4ff;
+
+  background: rgba(0, 0, 0, 0.6);
+
+  box-shadow: 0 0 1rem rgba(0, 212, 255, 0.25);
+}
+
+.server-info h3 {
+  margin: 0 0 0.4rem;
+
+  color: #00d4ff;
+}
+
+.server-info p {
+  margin: 0;
+
+  color: #d8f8ff;
+}
+
+.server-actions {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.botones {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.boton{
+  padding: 0.75rem 1.1rem;
+
+  border-radius: 10px;
+  border: 1px solid #00d4ff;
+
+  color: white;
+  background: #1f2a33;
+
+  font-size: 1rem;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
+}
+.botoneliminar:hover{
+
+  color: #06141d;
+  background: #d74b4b;
+
+  box-shadow: 0 0 0.8rem rgba(255, 0, 0, 0.45);
+
+}
+.boton:hover,
+.hover {
+  color: #06141d;
+  background: #00d4ff;
+
+  box-shadow: 0 0 0.8rem rgba(0, 212, 255, 0.45);
+}
+.botoneliminar {
+    padding: 0.75rem 1.1rem;
+
+  border-radius: 10px;
+  border: 1px solid #ff7d7d;
+  color: white;
+  background: #1f2a33;
+
+  font-size: 1rem;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
+}
+.boton:active {
+  transform: scale(0.97);
+}
+
+.empty-message {
+  padding: 2rem;
+
+  border: 1px dashed #00d4ff;
+  border-radius: 12px;
+
+  color: #bdefff;
+
+  text-align: center;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2rem;
+
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.modal-card {
+  width: min(480px, 100%);
+
+  display: grid;
+  gap: 1rem;
+
+  padding: 1.5rem;
+
+  border-radius: 14px;
+  border: 1px solid #00d4ff;
+
+  background: rgba(0, 0, 0, 0.9);
+
+  box-shadow: 0 0 1.5rem rgba(0, 212, 255, 0.35);
+}
+
+.modal-card h2 {
+  margin: 0;
+
+  color: #00d4ff;
+
+  text-align: center;
+}
+
+.modal-card label {
+  display: grid;
+  gap: 0.4rem;
+
+  color: white;
+}
+
+.modal-card input,
+.modal-card select {
+  padding: 0.75rem;
+
+  border-radius: 0.5rem;
+  border: 1px solid #00d4ff;
+
+  color: white;
+  background-color: #1f2a33;
+
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 700px) {
+
+  .server-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .server-actions {
+    flex-direction: column;
+  }
+
+  .botones {
+    flex-direction: column;
+  }
+
+}
+
+
+
+/*AÑADIR SERVIDOR*/
+.formulario {
+  display: grid;
+  gap: 1rem;
+}
+
+.formulario label {
+  display: grid;
+  gap: 0.4rem;
+
+  color: white;
+}
+
+.formulario input,
+.formulario select {
+  padding: 0.75rem;
+
+  border-radius: 0.5rem;
+  border: 1px solid #00d4ff;
+
+  background-color: #1f2a33;
+  color: white;
+
+  font-size: 1rem;
+}
+.ventana-topbar {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 1rem;
+}
+
+.boton-volver {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border-radius: 10px;
+  border: 1px solid #00d4ff;
+
+  color: white;
+  background: #1f2a33;
+
+  font-size: 1.5rem;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
+}
+
+.boton-volver:hover {
+  color: #06141d;
+  background: #00d4ff;
+
+  box-shadow: 0 0 0.8rem rgba(0, 212, 255, 0.45);
+}
+
+.boton-volver:active {
+  transform: scale(0.96);
+}

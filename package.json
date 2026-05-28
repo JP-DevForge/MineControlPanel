@@ -1,0 +1,26 @@
+{
+  "name": "minecontrolpanel",
+  "version": "1.0.0",
+  "description": "Administrador multi-servidor para Minecraft",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "minecraft",
+    "panel",
+    "server",
+    "minecraft-server",
+    "control-panel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ansi-to-html": "^0.7.2",
+    "express": "^5.2.1",
+    "prismarine-nbt": "^2.8.0",
+    "ws": "^8.20.1"
+  },
+  "type": "commonjs"
+}

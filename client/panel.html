@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MineControlPanel</title>
+
+  <link rel="stylesheet" href="/css/loader.css">
+</head>
+
+<body>
+
+  <header>
+    <h1 class="tittle">MineControlPanel</h1>
+
+    <section>
+      <h2 id="server-name"></h2>
+      <p id="server-path"></p>
+    </section>
+
+    <section>
+      <h4 id="ip"></h4>
+      <button id="copiar">Copiar</button>
+    </section>
+
+    <div class="estado">
+      <section class="boton">
+        <button id="start">
+          <h2 class="icono">⏻</h2>
+        </button>
+      </section>
+
+      <h2>Estado</h2>
+    </div>
+
+    <button id="back-home" type="button">← Volver</button>
+
+    <button
+      id="stop"
+      type="button">
+      Stop
+    </button>
+
+    <nav>
+      <a href="#p1_start" data-panel-section="p1_start">Estado</a>
+      <a href="#p2_console" data-panel-section="p2_console">Consola</a>
+      <a href="#p3_config" data-panel-section="p3_config">Configuración</a>
+      <a href="#p4_players" data-panel-section="p4_players">Jugadores</a>
+      <a href="#p5_worlds" data-panel-section="p5_worlds">Mundos</a>
+      <a href="#p6_contact" data-panel-section="p6_contact">Contacto</a>
+    </nav>
+  </header>
+
+  <div id="content">
+    <!-- aquí cargan las sections -->
+  </div>
+
+  <footer>
+    <p>Página creada por Jesús Ponce y Ángel Rodríguez</p>
+  </footer>
+
+  <script src="/js/util/ip.js"></script>
+  <script src="/js/scripts/start.js"></script>
+  <script type="module" src="/js/panel/main.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "7785ec93-15a6-421b-b047-befbeeff5ec6",
+    "type": "local",
+    "name": "server",
+    "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/server/",
+    "jar": "server.jar",
+    "port": 25565,
+    "createdAt": "2026-05-28T12:24:54.869Z"
+  },
+  {
+    "id": "6d1f630a-2100-47b3-80d6-517830628ea3",
+    "type": "local",
+    "name": "servidor",
+    "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/servidor/",
+    "jar": "server.jar",
+    "port": 25565,
+    "createdAt": "2026-05-28T13:51:12.572Z"
+  }
+]

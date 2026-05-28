@@ -1,0 +1,46 @@
+#console-output {
+  height: 400px;
+
+  background: #0b0b0b;
+  color: #e0e0e0;
+
+  font-family: monospace;
+  font-size: 14px;
+
+  padding: 10px;
+
+  border: 2px solid #2b2b2b;
+  border-radius: 6px;
+
+  overflow-y: auto;
+
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  box-sizing: border-box;
+}
+
+#console-form {
+  margin-top: 5px;
+}
+
+#console-input {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 8px 10px;
+
+  background-color: #111;
+  color: white;
+
+  border: none;
+  border-radius: 3px;
+
+  font-family: monospace;
+  font-size: 14px;
+}
+
+#console-input:focus {
+  outline: none;
+}

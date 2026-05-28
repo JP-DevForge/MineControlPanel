@@ -1,0 +1,43 @@
+import { loadSection } from "./selection.js";
+import { renderServers } from "./serverlist.js";
+import { addLocalServer } from "./botones.js";
+
+export async function renderHome() {
+  if (!await loadSection("selector", "home")) {
+    return;
+  }
+
+  document
+    .getElementById("open-add-server")
+    ?.addEventListener("click", showAddLocalServerForm);
+
+  document
+    .getElementById("open-create-server")
+    ?.addEventListener("click", showCreateServerScreen);
+
+  renderServers();
+}
+
+export async function showAddLocalServerForm() {
+  if (!await loadSection("selector", "addLocalServer")) {
+    return;
+  }
+
+  document
+    .getElementById("back-home")
+    ?.addEventListener("click", renderHome);
+
+  document
+    .getElementById("add-local-server-form")
+    ?.addEventListener("submit", addLocalServer);
+}
+
+export async function showCreateServerScreen() {
+  if (!await loadSection("selector", "createServer")) {
+    return;
+  }
+
+  document
+    .getElementById("back-home")
+    ?.addEventListener("click", renderHome);
+}
