@@ -4,7 +4,7 @@ const os = require("os");
 const serversJSON = require("../scripts/syncjson/ServersJSON");
 const syncWorlds = require("../scripts/syncjson/WorldsJSON");
 const minecraft = require("../scripts/minecraft");
-
+const minecraftConsole = require("../scripts/minecraftConsole");
 const {
   syncPlayers
 } = require("../scripts/syncjson/PlayersJSON");
@@ -168,7 +168,7 @@ router.get("/api/server/console", (req, res) => {
       });
     }
 
-    const log = minecraft.readConsole(server);
+const log = minecraftConsole.readConsole(server);
 
     res.json({
       success: true,
@@ -200,7 +200,7 @@ router.post("/api/server/command", async (req, res) => {
       });
     }
 
-    const response = await minecraft.sendCommand(server, command);
+const response = await minecraft.sendCommand(server, command);
 
     res.json({
       success: true,
