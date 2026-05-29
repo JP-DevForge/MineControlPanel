@@ -3,20 +3,6 @@
     <source src="../../img/Panoramico-av1-lossless.webm" type="video/webm">
   </video>
 
-  <section class="config-tabs">
-    <button class="config-tab active" data-config-tab="properties">
-      Server properties
-    </button>
-
-    <button class="config-tab" data-config-tab="commands">
-      Comandos automáticos
-    </button>
-
-    <button class="config-tab" data-config-tab="backups">
-      Backups
-    </button>
-  </section>
-
   <section id="config-properties" class="config-panel active">
     <section id="config-options" class="options">
       <p class="empty-message">Cargando configuración...</p>
@@ -27,23 +13,114 @@
     </button>
   </section>
 
-  <section id="config-commands" class="config-panel">
-    <section class="config-box">
-      <h2>Comandos automáticos</h2>
+
+<section id="config-backups" class="config-panel">
+
+  <div class="backup-container">
+
+    <div class="backup-header">
+
+      <div>
+        <h2>Ruta de backups</h2>
+
+        <p id="backup-path">
+          No configurada
+        </p>
+      </div>
+
+      <div class="backup-storage">
+        <span id="backup-size">
+          0 MB
+        </span>
+
+        <button id="edit-backup-path">
+          Editar
+        </button>
+      </div>
+
+    </div>
+
+    <div id="backup-list">
 
       <p class="empty-message">
-        Aquí irán los comandos programados del servidor.
+        No hay backups
       </p>
-    </section>
-  </section>
 
-  <section id="config-backups" class="config-panel">
-    <section class="config-box">
-      <h2>Backups</h2>
+    </div>
 
-      <p class="empty-message">
-        Aquí irá la configuración de copias de seguridad.
-      </p>
-    </section>
-  </section>
+    <div class="backup-settings">
+
+      <div class="backup-setting">
+
+        <label class="switch">
+          <input
+            id="automatic-backups"
+            type="checkbox"
+          >
+          <span class="slider"></span>
+        </label>
+
+        <span>
+          Backups automáticos cada
+        </span>
+
+        <input
+          id="backup-interval"
+          type="number"
+          min="1"
+          value="60"
+          class="number"
+        >
+
+        <span>
+          minutos
+        </span>
+
+        <span>
+          almacenar últimos
+        </span>
+
+        <input
+          id="backup-limit"
+          type="number"
+          min="1"
+          value="10"
+          class="number"
+        >
+
+        <span>
+          backups automáticos
+        </span>
+
+      </div>
+
+      <div class="backup-footer">
+
+        <div class="backup-setting">
+
+          <label class="switch">
+            <input
+              id="backup-on-start"
+              type="checkbox"
+            >
+            <span class="slider"></span>
+          </label>
+
+          <span>
+            Backup al iniciar
+          </span>
+
+        </div>
+
+        <button id="create-backup">
+          Crear backup ahora
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
 </main>

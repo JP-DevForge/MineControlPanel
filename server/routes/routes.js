@@ -1,6 +1,6 @@
 const express = require("express");
 const os = require("os");
-
+const backups = require("../scripts/backup");
 const serversJSON = require("../scripts/syncjson/ServersJSON");
 const syncWorlds = require("../scripts/syncjson/WorldsJSON");
 const minecraft = require("../scripts/minecraft");
@@ -131,7 +131,11 @@ router.post("/api/server/start", async (req, res) => {
     serversJSON.updateServer(savedServer.id, {
       rcon: updatedServer.rcon
     });
+    const backupConfig = backups.getConfig(updatedServer);
 
+    if (backupConfig.backupOnStart === true) {
+      await backups.backup(updatedServer, "start");
+    }
     await minecraft.startServer(updatedServer);
 
     res.json({
@@ -169,7 +173,7 @@ router.get("/api/server/console", (req, res) => {
       });
     }
 
-const log = minecraftConsole.readConsole(server);
+    const log = minecraftConsole.readConsole(server);
 
     res.json({
       success: true,
@@ -201,7 +205,7 @@ router.post("/api/server/command", async (req, res) => {
       });
     }
 
-const response = await minecraft.sendCommand(server, command);
+    const response = await minecraft.sendCommand(server, command);
 
     res.json({
       success: true,
@@ -326,6 +330,239 @@ router.post("/api/server/properties/save", (req, res) => {
     });
   } catch (error) {
     handleError(res, error, "Error guardando server.properties");
+  }
+});
+// =========================
+// BACKUPS
+// =========================
+
+router.post("/api/server/backups", (req, res) => {
+  try {
+    const { serverId } = req.body;
+
+    const server = serversJSON
+      .getServers()
+      .find(s => s.id === serverId);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const backupsList =
+      backups.listBackups(server);
+
+    res.json({
+      success: true,
+      backups: backupsList
+    });
+
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Error obteniendo backups"
+    );
+  }
+});
+
+router.post("/api/server/backups/create", async (req, res) => {
+  try {
+    const {
+      serverId,
+      reason
+    } = req.body;
+
+    const server = serversJSON
+      .getServers()
+      .find(s => s.id === serverId);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const backup = await backups.backup(
+      server,
+      reason || "manual"
+    );
+
+    res.json({
+      success: true,
+      backup
+    });
+
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Error creando backup"
+    );
+  }
+});
+
+router.post("/api/server/backups/restore", async (req, res) => {
+  try {
+    const {
+      serverId,
+      backupId
+    } = req.body;
+
+    const server = serversJSON
+      .getServers()
+      .find(s => s.id === serverId);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    await backups.restoreBackup(
+      server,
+      backupId
+    );
+
+    res.json({
+      success: true
+    });
+
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Error restaurando backup"
+    );
+  }
+});
+
+router.post("/api/server/backups/delete", (req, res) => {
+  try {
+    const {
+      serverId,
+      backupId
+    } = req.body;
+
+    const server = serversJSON
+      .getServers()
+      .find(s => s.id === serverId);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    backups.deleteBackup(
+      server,
+      backupId
+    );
+
+    res.json({
+      success: true
+    });
+
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Error eliminando backup"
+    );
+  }
+});
+router.post("/api/server/backups/config", (req, res) => {
+  try {
+    const { serverId } = req.body;
+
+    const server = findServer(serverId);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const config = backups.getConfig(server);
+
+    res.json({
+      success: true,
+      config
+    });
+
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Error obteniendo configuración de backups"
+    );
+  }
+});
+router.post("/api/server/backups/config/save", (req, res) => {
+  try {
+    const {
+      serverId,
+      backupPath,
+      backupOnStart,
+      automaticBackups,
+      automaticIntervalMinutes,
+      maxAutomaticBackups
+    } = req.body;
+
+    const server = findServer(serverId);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    backups.testBackupPath(backupPath);
+
+    const config = backups.saveConfig(server, {
+      backupPath,
+      backupOnStart,
+      automaticBackups,
+      automaticIntervalMinutes,
+      maxAutomaticBackups
+    });
+
+    res.json({
+      success: true,
+      config
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(400).json({
+      success: false,
+      error: error.message || "Error guardando configuración de backups"
+    });
+  }
+});
+router.post("/api/server/backups/test-path", (req, res) => {
+  try {
+    const { backupPath } = req.body;
+
+    backups.testBackupPath(backupPath);
+
+    res.json({
+      success: true
+    });
+
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: "La ruta no es válida o no tiene permisos de escritura"
+    });
   }
 });
 module.exports = router;

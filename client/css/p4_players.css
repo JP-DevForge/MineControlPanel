@@ -105,7 +105,7 @@
   text-align: left;
 }
 
-button {
+.accion {
   background: linear-gradient(135deg, #0f3460, #1a3a52);
   border: 1px solid #00d4ff;
   color: #00d4ff;
@@ -115,12 +115,12 @@ button {
   font-size: 1.6rem;
 }
 
-button:hover {
+.accion:hover {
   background: linear-gradient(135deg, #16213e, #1a3a52);
   color: #fff;
   box-shadow: 0 0 1rem #00d4ff;
 }
-button:active {
+.accion:active {
   transform: translateY(2px);
   box-shadow: 0 0 0.5rem #00d4ff;
 }
