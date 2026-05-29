@@ -1,3 +1,6 @@
+import { getCurrentServer } from "./panel/currentServer.js";
+import { renderConfig } from "./panel/config.js";
+
 const contentDiv = document.getElementById("content");
 
 const cssMap = {
@@ -11,7 +14,19 @@ const cssMap = {
 
 const sectionInitMap = {
   p2_console: "iniciarConsole",
+  p3_config: "iniciarConfig",
   p4_players: "iniciarPlayers"
+};
+
+window.iniciarConfig = async function () {
+  const server = await getCurrentServer();
+
+  if (!server) {
+    console.error("No hay servidor seleccionado");
+    return;
+  }
+
+  renderConfig(server);
 };
 
 export async function loadPanelSection(name) {

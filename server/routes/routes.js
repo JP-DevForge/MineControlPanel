@@ -5,6 +5,7 @@ const serversJSON = require("../scripts/syncjson/ServersJSON");
 const syncWorlds = require("../scripts/syncjson/WorldsJSON");
 const minecraft = require("../scripts/minecraft");
 const minecraftConsole = require("../scripts/minecraftConsole");
+const properties = require("../scripts/properties");
 const {
   syncPlayers
 } = require("../scripts/syncjson/PlayersJSON");
@@ -285,5 +286,46 @@ router.post("/api/servers/:id/rcon/ensure", (req, res) => {
     handleError(res, error, "No se pudo configurar RCON");
   }
 });
+router.post("/api/server/properties", (req, res) => {
+  try {
+    const { server } = req.body;
 
+    if (!server || !server.path) {
+      return res.status(400).json({
+        success: false,
+        error: "Servidor no válido"
+      });
+    }
+
+    const data = properties.readProperties(server.path);
+
+    res.json({
+      success: true,
+      properties: data
+    });
+  } catch (error) {
+    handleError(res, error, "Error leyendo server.properties");
+  }
+});
+
+router.post("/api/server/properties/save", (req, res) => {
+  try {
+    const { server, properties: newProperties } = req.body;
+
+    if (!server || !server.path) {
+      return res.status(400).json({
+        success: false,
+        error: "Servidor no válido"
+      });
+    }
+
+    properties.saveProperties(server.path, newProperties);
+
+    res.json({
+      success: true
+    });
+  } catch (error) {
+    handleError(res, error, "Error guardando server.properties");
+  }
+});
 module.exports = router;
