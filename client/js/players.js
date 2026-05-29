@@ -1,196 +1,243 @@
-///////////////////////////////////////
-//AJAX jugadores
+import { getCurrentServer } from "./currentServer.js";
 
-//const syncPlayers = require("./syncPlayers");
+let allPlayers = [];
+let filteredPlayers = [];
+let selectedId = null;
 
-///////////////////////////////////////
+window.enviarMsg = function (player) {
+  const texto = prompt("Mensaje para " + player);
+
+  if (texto && texto.trim() !== "") {
+    mcCommand("msg " + player + " " + texto);
+  }
+};
+
+window.enviarKick = function (player) {
+  const texto = prompt("Motivo de expulsión para " + player);
+
+  if (texto && texto.trim() !== "") {
+    mcCommand("kick " + player + " " + texto);
+  }
+};
+
+window.enviarBan = function (player) {
+  const texto = prompt("Motivo de baneo para " + player);
+
+  if (texto && texto.trim() !== "") {
+    mcCommand("ban " + player + " " + texto);
+  }
+};
+
 window.enviarDamage = function (player) {
   let cantidad = prompt("Cantidad de daño a " + player);
-  cantidad = Number(cantidad); // Convertimos a número
+  cantidad = Number(cantidad);
 
   if (!isNaN(cantidad) && cantidad > 0) {
     mcCommand("damage " + player + " " + cantidad);
   } else {
-    alert("Por favor, introduce un número válido");
+    alert("Introduce un número válido");
   }
 };
-var btnDamage = '<button onclick="enviarDamage()">Dañar</button>';
-function iniciarPlayers() {
-  // Elementos del DOM
-  var tbody = document.getElementById("tbody");
-  var filterInput = document.getElementById("filter");
-  var count = document.getElementById("count");
 
-  // Datos
-  var allPlayers = [];
-  var filteredPlayers = [];
-  var selectedId = null;
+window.updatePlayers = async function () {
+  await cargarPlayers();
+};
 
-  // ---------------- Construir HTML detalle ----------------
-  function buildDetailHtml(player) {
+async function iniciarPlayers() {
+  const filterInput = document.getElementById("filter");
+  const tbody = document.getElementById("tbody");
 
-    var c = player.coordenadas || {};
-    var posActual = "x=" + c.x + ", y=" + c.y + ", z=" + c.z;
-
-    return (
-      '<div class="kvs">' +
-
-      '<div class="key">Jugador</div><div class="val">' + player.name + '</div>' +
-      '<div class="key">Modo de Juego</div><div class="val">' + player.gamemode + '</div>' +
-      '<div class="key">Rango</div><div class="val">' + player.rango + '</div>' +
-      '<div class="key">Mundo</div><div class="val">' + player.mundo + '</div>' +
-
-      '<div class="key">Vida</div><div class="val">' + player.vida +'/20' + btnDamage + '</div>' +
-      '<div class="key">Comida</div><div class="val">' + player.comida + '/20</div>' +
-
-      '<div class="key">Coordenadas actuales</div><div class="val">' + posActual + '</div>' +
-      '</div>'
-    );
+  if (!tbody) {
+    console.error("No existe #tbody");
+    return;
   }
 
-  // ---------------- Render tabla (con detalle en fila) ----------------
-
-  function renderTable() {
-    if (filteredPlayers.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5">No hay resultados</td></tr>';
-      return;
-    }
-
-    var html = "";
-
-    for (var i = 0; i < filteredPlayers.length; i++) {
-
-      var p = filteredPlayers[i];
-      var selected = (p.id === selectedId);
-      var selectedClass = selected ? "selected" : "";
-
-      //      var c = p.coordenadas;
-      //      var pos = "x=" + c.x + ", y=" + c.y + ", z=" + c.z;
-      var btnmsg = '<button onclick="enviarMsg(\'' + p.name + '\')">Mensaje</button>';
-      var btnkick = '<button onclick="enviarKick(\'' + p.name + '\')">Expulsar</button>';
-      var btnBan = '<button onclick="enviarBan(\'' + p.name + '\')">Banear</button>';
-      window.enviarMsg = function (player) {
-        const texto = prompt("Mensaje para " + player);
-        if (texto) {
-          mcCommand("msg " + player + " " + texto);
-        }
-      };
-      window.enviarKick = function (player) {
-        const texto = prompt("motivo de expulsion para " + player);
-        if (texto) {
-          if (texto && texto.trim() !== "") {
-            mcCommand("kick " + player + " " + texto);
-          }
-        }
-      };
-      var botones = btnmsg + " " + btnkick + " " + btnBan;
-      var btnOp = '<button onclick="updatePlayers(); mcCommand(\'op ' + p.name + '\')">⬆️</button>';
-      var btnDeop = '<button onclick="updatePlayers(); mcCommand(\'deop ' + p.name + '\')">⬇️</button>';
-      html +=
-        '<tr class="' + selectedClass + '" data-id="' + p.id + '">' +
-        '<td><img src="https://mineskin.eu/helm/' + p.name + '/100.png" alt="skin" /></td>' +
-        '<td>' + p.name + '</td>' +
-        '<td>' + p.gamemode + '</td>' +
-        '<td>' + btnOp + p.rango + btnDeop + '</td>' +
-        '<td>' + p.mundo + '</td>' +
-        '<td> ' + botones + ' </td>' +
-        '</tr>';
-
-      // Fila de detalle justo debajo del seleccionado
-      if (selected) {
-        html +=
-          '<tr class="detail-row">' +
-          '<td colspan="5">' +
-          buildDetailHtml(p) +
-          '</td>' +
-          '</tr>';
-      }
-    }
-
-    tbody.innerHTML = html;
+  if (filterInput) {
+    filterInput.addEventListener("input", applyFilter);
   }
-
-  // ---------------- Filtro ----------------
-  function applyFilter() {
-
-    var q = filterInput.value.toLowerCase();
-
-    filteredPlayers = [];
-
-    for (var i = 0; i < allPlayers.length; i++) {
-
-      var p = allPlayers[i];
-
-      var busqueda =
-        p.name + " " +
-        p.gamemode + " " +
-        p.rango + " " +
-        p.mundo + " " +
-        p.coordenadas.x + " " +
-        p.coordenadas.y + " " +
-        p.coordenadas.z;
-
-      if (busqueda.toLowerCase().includes(q)) {
-        filteredPlayers.push(p);
-      }
-    }
-
-    renderTable();
-    count.textContent = filteredPlayers.length + " / " + allPlayers.length;
-  }
-
-  // ---------------- Selección ----------------
-  function selectPlayerById(id) {
-    selectedId = id;
-    renderTable();
-  }
-
-  // ---------------- Carga JSON ----------------
-  fetch("./js/API/players.json")
-    .then(function (res) {
-      return res.json();
-    })
-    .then(function (data) {
-
-      allPlayers = data;
-      filteredPlayers = data;
-
-      if (allPlayers.length > 0) {
-        selectedId = allPlayers[0].id;
-      }
-
-      renderTable();
-      count.textContent = filteredPlayers.length + " / " + allPlayers.length;
-    });
-
-  // Eventos
-  filterInput.addEventListener("input", applyFilter);
 
   tbody.addEventListener("click", function (e) {
+    const tr = e.target.closest("tr[data-id]");
 
-    var tr = e.target.closest("tr");
     if (!tr) return;
 
-    var id = Number(tr.getAttribute("data-id"));
-    selectPlayerById(id);
+    selectedId = tr.dataset.id;
+    renderTable();
   });
+
+  await cargarPlayers();
 }
 
+async function cargarPlayers() {
+  const server = getCurrentServer();
 
+  if (!server) {
+    console.error("No hay servidor seleccionado");
+    return;
+  }
 
+  try {
+    const response = await fetch(
+      `/api/servers/${server.id}/players`
+    );
 
-///////////////////////////////////
-// Sincronización jugadores
-///////////////////////////////////
+    const data = await response.json();
 
-async function updatePlayers() {
-  await mcCommand("save-all");
-  await new Promise(r => setTimeout(r, 1000));
+    if (!response.ok) {
+      throw new Error(data.error || "Error cargando jugadores");
+    }
 
-  await fetch("/syncPlayers");
+    allPlayers = Array.isArray(data) ? data : [];
+    filteredPlayers = allPlayers;
 
+    if (allPlayers.length > 0 && !selectedId) {
+      selectedId = allPlayers[0].uuid;
+    }
 
+    applyFilter();
 
-  window.location.reload();
+  } catch (error) {
+    console.error(error);
 
+    const tbody = document.getElementById("tbody");
+
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="muted">
+            Error cargando jugadores.
+          </td>
+        </tr>
+      `;
+    }
+  }
 }
+
+function applyFilter() {
+  const filterInput = document.getElementById("filter");
+  const count = document.getElementById("count");
+
+  const q = filterInput
+    ? filterInput.value.toLowerCase()
+    : "";
+
+  filteredPlayers = allPlayers.filter(player => {
+    const c = player.coordenadas || {};
+
+    const text = [
+      player.name,
+      player.gamemode,
+      player.rango,
+      player.mundo,
+      c.x,
+      c.y,
+      c.z
+    ].join(" ").toLowerCase();
+
+    return text.includes(q);
+  });
+
+  renderTable();
+
+  if (count) {
+    count.textContent = `${filteredPlayers.length} / ${allPlayers.length}`;
+  }
+}
+
+function renderTable() {
+  const tbody = document.getElementById("tbody");
+
+  if (!tbody) return;
+
+  if (filteredPlayers.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="muted">
+          No hay resultados
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filteredPlayers.map(player => {
+    const selected = player.uuid === selectedId;
+    const selectedClass = selected ? "selected" : "";
+
+    let html = `
+      <tr class="${selectedClass}" data-id="${player.uuid}">
+        <td>
+          <img
+            src="https://mineskin.eu/helm/${player.name}/100.png"
+            alt="skin"
+          >
+        </td>
+
+        <td>${player.name}</td>
+        <td>${player.gamemode}</td>
+
+        <td>
+          <button onclick="mcCommand('op ${player.name}'); updatePlayers()">⬆️</button>
+          ${player.rango}
+          <button onclick="mcCommand('deop ${player.name}'); updatePlayers()">⬇️</button>
+        </td>
+
+        <td>${player.mundo}</td>
+
+        <td>
+          <button onclick="enviarMsg('${player.name}')">Mensaje</button>
+          <button onclick="enviarKick('${player.name}')">Expulsar</button>
+          <button onclick="enviarBan('${player.name}')">Banear</button>
+        </td>
+      </tr>
+    `;
+
+    if (selected) {
+      html += `
+        <tr class="detail-row">
+          <td colspan="6">
+            ${buildDetailHtml(player)}
+          </td>
+        </tr>
+      `;
+    }
+
+    return html;
+  }).join("");
+}
+
+function buildDetailHtml(player) {
+  const c = player.coordenadas || {};
+
+  return `
+    <div class="kvs">
+      <div class="key">Jugador</div>
+      <div class="val">${player.name}</div>
+
+      <div class="key">Modo de Juego</div>
+      <div class="val">${player.gamemode}</div>
+
+      <div class="key">Rango</div>
+      <div class="val">${player.rango}</div>
+
+      <div class="key">Mundo</div>
+      <div class="val">${player.mundo}</div>
+
+      <div class="key">Vida</div>
+      <div class="val">
+        ${player.vida}/20
+        <button onclick="enviarDamage('${player.name}')">Dañar</button>
+      </div>
+
+      <div class="key">Comida</div>
+      <div class="val">${player.comida}/20</div>
+
+      <div class="key">Coordenadas actuales</div>
+      <div class="val">
+        x=${c.x}, y=${c.y}, z=${c.z}
+      </div>
+    </div>
+  `;
+}
+
+window.iniciarPlayers = iniciarPlayers;

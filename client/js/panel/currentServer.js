@@ -1,25 +1,26 @@
-export function getCurrentServer() {
+export async function getCurrentServer() {
   const params = new URLSearchParams(window.location.search);
   const serverId = params.get("serverId");
 
-  const servers = JSON.parse(
-    localStorage.getItem("mcp_saved_servers") || "[]"
-  );
-
-  if (serverId) {
-    const server = servers.find(server => server.id === serverId);
-
-    if (server) {
-      localStorage.setItem(
-        "mcp_current_server",
-        JSON.stringify(server)
-      );
-
-      return server;
-    }
+  if (!serverId) {
+    return JSON.parse(
+      localStorage.getItem("mcp_current_server") || "null"
+    );
   }
 
-  return JSON.parse(
-    localStorage.getItem("mcp_current_server") || "null"
+  const response = await fetch(`/api/servers/${serverId}`);
+
+  if (!response.ok) {
+    console.error("Servidor no encontrado en backend:", serverId);
+    return null;
+  }
+
+  const server = await response.json();
+
+  localStorage.setItem(
+    "mcp_current_server",
+    JSON.stringify(server)
   );
+
+  return server;
 }

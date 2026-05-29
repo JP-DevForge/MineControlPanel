@@ -1,7 +1,7 @@
 import { getCurrentServer } from "./currentServer.js";
 
 async function iniciarPlayers() {
-    const server = getCurrentServer();
+    const server = await getCurrentServer();
 
     if (!server) {
         console.error("No hay servidor seleccionado");
