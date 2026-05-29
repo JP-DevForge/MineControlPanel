@@ -97,9 +97,7 @@ router.get("/api/server/status", (req, res) => {
     running: minecraft.isRunning()
   });
 });
-
 router.post("/api/server/start", async (req, res) => {
-
   try {
     const { server } = req.body;
 
@@ -115,35 +113,6 @@ router.post("/api/server/start", async (req, res) => {
   }
 });
 
-router.post("/api/server/stop", async (req, res) => {
-  try {
-    await minecraft.stopServer();
-
-    res.json({
-      success: true,
-      message: "Servidor detenido"
-    });
-
-  } catch (error) {
-    handleError(res, error, "No se pudo detener el servidor");
-  }
-});
-
-router.post("/api/server/restart", async (req, res) => {
-  try {
-    const { server } = req.body;
-
-    await minecraft.restartServer(server);
-
-    res.json({
-      success: true,
-      message: "Servidor reiniciado"
-    });
-
-  } catch (error) {
-    handleError(res, error, "No se pudo reiniciar el servidor");
-  }
-});
 
 // =========================
 // COMANDOS
@@ -212,6 +181,34 @@ router.get("/api/worlds", async (req, res) => {
 
   } catch (error) {
     handleError(res, error, "No se pudieron obtener los mundos");
+  }
+});
+router.post("/api/servers/:id/rcon/ensure", (req, res) => {
+  try {
+    const server = serversJSON
+      .getServers()
+      .find(server => server.id === req.params.id);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const updatedServer = ensureRconConfig(server);
+
+    serversJSON.updateServer(server.id, {
+      rcon: updatedServer.rcon
+    });
+
+    res.json({
+      success: true,
+      server: updatedServer
+    });
+
+  } catch (error) {
+    handleError(res, error, "No se pudo configurar RCON");
   }
 });
 module.exports = router;

@@ -72,3 +72,38 @@ module.exports = {
   addServer,
   removeServer
 };
+function updateServer(id, data) {
+  const servers = getServers();
+
+  const index = servers.findIndex(server => server.id === id);
+
+  if (index === -1) {
+    return null;
+  }
+
+  servers[index] = {
+    ...servers[index],
+    ...data
+  };
+
+  saveServers(servers);
+
+  return servers[index];
+} function updateServer(id, data) {
+  const servers = getServers();
+
+  const index = servers.findIndex(server => server.id === id);
+
+  if (index === -1) {
+    return null;
+  }
+
+  servers[index] = {
+    ...servers[index],
+    ...data
+  };
+
+  saveServers(servers);
+
+  return servers[index];
+}

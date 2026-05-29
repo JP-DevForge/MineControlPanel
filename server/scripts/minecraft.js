@@ -1,100 +1,85 @@
 const { spawn } = require("child_process");
-const AnsiToHtml = require("ansi-to-html");
+const fs = require("fs");
+const path = require("path");
 
-const convert = new AnsiToHtml();
 const websocket = require("../websocket");
-const {
-    appendConsoleLine,
-    getConsoleHistory
-} = require('./syncjson/ConsoleHistoryJSON');
-let mcServer = null;
+
+let currentServer = null;
 let mcRunning = false;
 
 function startServer(server) {
+  if (mcRunning) {
+    throw new Error("El servidor ya está iniciado");
+  }
 
-    if (mcRunning) {
-        throw new Error("El servidor ya está iniciado");
+  if (!server || !server.path || !server.jar) {
+    throw new Error("Faltan path o jar del servidor");
+  }
+
+  const jarPath = path.join(server.path, server.jar);
+
+  if (!fs.existsSync(jarPath)) {
+    throw new Error(`No existe el jar: ${jarPath}`);
+  }
+
+  const child = spawn(
+    "java",
+    [
+      "-jar",
+      server.jar,
+      "nogui"
+    ],
+    {
+      cwd: server.path,
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true
     }
+  );
 
-    if (!server || !server.path || !server.jar) {
-        throw new Error("Faltan path o jar del servidor");
-    }
+  child.unref();
 
-    mcServer = spawn("java", ["-jar", server.jar], {
-        cwd: server.path
-    });
+  currentServer = server;
+  mcRunning = true;
 
-    mcRunning = true;
+  websocket.broadcastConsole(
+    `Servidor iniciado de forma independiente: ${server.name}\n`
+  );
 
-    websocket.broadcastConsole(`Arrancando servidor: ${server.name}\n`);
-
-    mcServer.stdout.on("data", data => {
-        const raw = data.toString();
-        const html = convert.toHtml(raw);
-
-        websocket.broadcastConsole(html);
-    });
-
-    mcServer.stderr.on("data", data => {
-        const raw = data.toString();
-        const html = convert.toHtml(raw);
-
-        websocket.broadcastConsole(html);
-    });
-
-    mcServer.on("error", error => {
-        websocket.broadcastConsole(
-            `Error al iniciar el servidor: ${error.message}\n`
-        );
-
-        mcRunning = false;
-        mcServer = null;
-    });
-
-    mcServer.on("close", code => {
-        websocket.broadcastConsole(
-            `Servidor detenido con código ${code}\n`
-        );
-
-        mcRunning = false;
-        mcServer = null;
-    });
+  return true;
 }
 
 function stopServer() {
-    if (!mcRunning || !mcServer) {
-        throw new Error("El servidor no está iniciado");
-    }
-
-    mcServer.stdin.write("stop\n");
-    websocket.broadcastConsole("> stop\n");
+  throw new Error(
+    "El servidor independiente debe detenerse por RCON con el comando stop"
+  );
 }
 
 function restartServer(server) {
-    stopServer();
-
-    setTimeout(() => {
-        startServer(server);
-    }, 3000);
+  throw new Error(
+    "El reinicio independiente debe hacerse con RCON stop y luego startServer"
+  );
 }
 
-function sendCommand(command) {
-    if (!mcRunning || !mcServer) {
-        throw new Error("El servidor no está iniciado");
-    }
-
-    mcServer.stdin.write(command + "\n");
-    websocket.broadcastConsole(`> ${command}\n`);
+function sendCommand() {
+  throw new Error(
+    "Los comandos deben enviarse por RCON cuando el servidor es independiente"
+  );
 }
 
 function isRunning() {
-    return mcRunning;
+  return mcRunning;
+}
+
+function getCurrentServer() {
+  return currentServer;
 }
 
 module.exports = {
-    startServer,
-    stopServer,
-    restartServer,
-    sendCommand,
-    isRunning
+  startServer,
+  stopServer,
+  restartServer,
+  sendCommand,
+  isRunning,
+  getCurrentServer
 };

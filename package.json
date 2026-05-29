@@ -20,6 +20,7 @@
     "ansi-to-html": "^0.7.2",
     "express": "^5.2.1",
     "prismarine-nbt": "^2.8.0",
+    "rcon-client": "^4.2.5",
     "ws": "^8.20.1"
   },
   "type": "commonjs"
