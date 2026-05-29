@@ -53,6 +53,7 @@ function addServer(data) {
   };
 
   servers.push(server);
+
   saveServers(servers);
 
   return server;
@@ -66,33 +67,12 @@ function removeServer(id) {
   saveServers(servers);
 }
 
-module.exports = {
-  getServers,
-  saveServers,
-  addServer,
-  removeServer
-};
 function updateServer(id, data) {
   const servers = getServers();
 
-  const index = servers.findIndex(server => server.id === id);
-
-  if (index === -1) {
-    return null;
-  }
-
-  servers[index] = {
-    ...servers[index],
-    ...data
-  };
-
-  saveServers(servers);
-
-  return servers[index];
-} function updateServer(id, data) {
-  const servers = getServers();
-
-  const index = servers.findIndex(server => server.id === id);
+  const index = servers.findIndex(
+    server => server.id === id
+  );
 
   if (index === -1) {
     return null;
@@ -107,3 +87,11 @@ function updateServer(id, data) {
 
   return servers[index];
 }
+
+module.exports = {
+  getServers,
+  saveServers,
+  addServer,
+  removeServer,
+  updateServer
+};

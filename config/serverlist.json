@@ -15,6 +15,12 @@
     "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/servidor/",
     "jar": "server.jar",
     "port": 25565,
-    "createdAt": "2026-05-28T13:51:12.572Z"
+    "createdAt": "2026-05-28T13:51:12.572Z",
+    "rcon": {
+      "enabled": true,
+      "host": "127.0.0.1",
+      "port": 25575,
+      "password": "sjDNRBVWLgzpRAl7tEXDxOYC"
+    }
   }
 ]

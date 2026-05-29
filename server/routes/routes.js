@@ -11,7 +11,9 @@ const {
   syncPlayers,
   getPlayers
 } = require("../scripts/syncjson/PlayersJSON");
-
+const {
+  ensureRconConfig
+} = require("../scripts/rcon/RconConfig");
 function handleError(res, error, message) {
   console.error(error);
 
@@ -101,7 +103,13 @@ router.post("/api/server/start", async (req, res) => {
   try {
     const { server } = req.body;
 
-    await minecraft.startServer(server);
+    const updatedServer = ensureRconConfig(server);
+
+    serversJSON.updateServer(server.id, {
+      rcon: updatedServer.rcon
+    });
+
+    await minecraft.startServer(updatedServer);
 
     res.json({
       success: true,
