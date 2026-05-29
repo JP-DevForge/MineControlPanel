@@ -10,25 +10,8 @@ function setupWebSocket(server) {
 
     socket.send(JSON.stringify({
       type: "console",
-      data: "Conectado a la consola del servidor"
+      data: "Conectado a la consola"
     }));
-
-    socket.on("message", message => {
-      try {
-        const data = JSON.parse(message);
-
-        if (data.type === "command") {
-          const minecraft = require("./scripts/minecraft");
-          minecraft.sendCommand(data.command);
-        }
-
-      } catch (error) {
-        socket.send(JSON.stringify({
-          type: "error",
-          data: "Comando inválido"
-        }));
-      }
-    });
 
     socket.on("close", () => {
       console.log("Cliente WebSocket desconectado");

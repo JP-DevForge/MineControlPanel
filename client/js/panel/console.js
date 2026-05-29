@@ -1,4 +1,4 @@
-let socket = null;
+let consoleInterval = null;
 
 window.iniciarConsole = function iniciarConsole() {
   const output = document.getElementById("console-output");
@@ -10,72 +10,73 @@ window.iniciarConsole = function iniciarConsole() {
     return;
   }
 
-  connectConsole(output);
+  const activeServerRaw = sessionStorage.getItem("mcp_active_server");
 
-  sendButton.onclick = () => {
-    sendConsoleCommand(output, input);
-  };
+  if (!activeServerRaw) {
+    output.textContent = "No hay servidor seleccionado.";
+    return;
+  }
+
+  const selectedServer = JSON.parse(activeServerRaw);
+
+  async function loadConsole() {
+    const response = await fetch(
+      `/api/server/console?id=${selectedServer.id}`
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+      output.textContent = data.error;
+      return;
+    }
+
+    output.textContent = data.log;
+    output.scrollTop = output.scrollHeight;
+  }
+
+  async function sendCommand() {
+    const command = input.value.trim();
+
+    if (!command) {
+      return;
+    }
+
+    const response = await fetch("/api/server/command", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: selectedServer.id,
+        command
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      output.textContent += `\n[MineControlPanel] ${data.error}`;
+    }
+
+    input.value = "";
+
+    setTimeout(loadConsole, 300);
+  }
+
+  sendButton.onclick = sendCommand;
 
   input.onkeydown = event => {
     if (event.key === "Enter") {
       event.preventDefault();
-      sendConsoleCommand(output, input);
+      sendCommand();
     }
   };
+
+  if (consoleInterval) {
+    clearInterval(consoleInterval);
+  }
+
+  loadConsole();
+  consoleInterval = setInterval(loadConsole, 1000);
 };
-
-function connectConsole(output) {
-  if (
-    socket &&
-    socket.readyState !== WebSocket.CLOSED &&
-    socket.readyState !== WebSocket.CLOSING
-  ) {
-    return;
-  }
-
-  socket = new WebSocket(`ws://${location.host}`);
-
-  socket.onopen = () => {
-    output.innerHTML += `<div>Conectado a la consola.</div>`;
-  };
-
-  socket.onmessage = event => {
-    const message = JSON.parse(event.data);
-
-    if (message.type !== "console") {
-      return;
-    }
-
-    output.innerHTML += `<div>${message.data}</div>`;
-    output.scrollTop = output.scrollHeight;
-  };
-
-  socket.onerror = () => {
-    output.innerHTML += `<div>Error conectando con WebSocket.</div>`;
-  };
-
-  socket.onclose = () => {
-    output.innerHTML += `<div>Conexión WebSocket cerrada.</div>`;
-  };
-}
-
-function sendConsoleCommand(output, input) {
-  const command = input.value.trim();
-
-  if (!command) {
-    return;
-  }
-
-  if (!socket || socket.readyState !== WebSocket.OPEN) {
-    output.innerHTML += `<div>No hay conexión con la consola.</div>`;
-    input.value = "";
-    return;
-  }
-
-  socket.send(JSON.stringify({
-    type: "command",
-    command
-  }));
-
-  input.value = "";
-}

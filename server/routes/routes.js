@@ -3,17 +3,18 @@ const os = require("os");
 
 const serversJSON = require("../scripts/syncjson/ServersJSON");
 const syncWorlds = require("../scripts/syncjson/WorldsJSON");
-
 const minecraft = require("../scripts/minecraft");
 
-const router = express.Router();
 const {
-  syncPlayers,
-  getPlayers
+  syncPlayers
 } = require("../scripts/syncjson/PlayersJSON");
+
 const {
   ensureRconConfig
 } = require("../scripts/rcon/RconConfig");
+
+const router = express.Router();
+
 function handleError(res, error, message) {
   console.error(error);
 
@@ -21,6 +22,12 @@ function handleError(res, error, message) {
     success: false,
     error: message
   });
+}
+
+function findServer(id) {
+  return serversJSON
+    .getServers()
+    .find(server => server.id === id);
 }
 
 // =========================
@@ -58,9 +65,7 @@ router.get("/api/servers", (req, res) => {
 });
 
 router.get("/api/servers/:id", (req, res) => {
-  const server = serversJSON
-    .getServers()
-    .find(item => item.id === req.params.id);
+  const server = findServer(req.params.id);
 
   if (!server) {
     return res.status(404).json({
@@ -99,13 +104,30 @@ router.get("/api/server/status", (req, res) => {
     running: minecraft.isRunning()
   });
 });
+
 router.post("/api/server/start", async (req, res) => {
   try {
     const { server } = req.body;
 
-    const updatedServer = ensureRconConfig(server);
+    if (!server || !server.id) {
+      return res.status(400).json({
+        success: false,
+        error: "Servidor requerido"
+      });
+    }
 
-    serversJSON.updateServer(server.id, {
+    const savedServer = findServer(server.id);
+
+    if (!savedServer) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const updatedServer = ensureRconConfig(savedServer);
+
+    serversJSON.updateServer(savedServer.id, {
       rcon: updatedServer.rcon
     });
 
@@ -113,7 +135,8 @@ router.post("/api/server/start", async (req, res) => {
 
     res.json({
       success: true,
-      message: "Servidor iniciado"
+      message: "Servidor iniciado",
+      server: updatedServer
     });
 
   } catch (error) {
@@ -121,41 +144,81 @@ router.post("/api/server/start", async (req, res) => {
   }
 });
 
-
 // =========================
-// COMANDOS
+// CONSOLA
 // =========================
 
-router.post("/api/server/command", (req, res) => {
-  const { command } = req.body;
-
-  if (!command) {
-    return res.status(400).json({
-      success: false,
-      error: "Comando requerido"
-    });
-  }
-
+router.get("/api/server/console", (req, res) => {
   try {
-    minecraft.sendCommand(command);
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "ID de servidor requerido"
+      });
+    }
+
+    const server = findServer(id);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const log = minecraft.readConsole(server);
 
     res.json({
-      success: true
+      success: true,
+      log
     });
 
   } catch (error) {
-    handleError(res, error, "No se pudo enviar el comando");
+    handleError(res, error, "No se pudo leer latest.log");
+  }
+});
+
+router.post("/api/server/command", async (req, res) => {
+  try {
+    const { id, command } = req.body;
+
+    if (!id || !command) {
+      return res.status(400).json({
+        success: false,
+        error: "Faltan id o command"
+      });
+    }
+
+    const server = findServer(id);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const response = await minecraft.sendCommand(server, command);
+
+    res.json({
+      success: true,
+      response
+    });
+
+  } catch (error) {
+    handleError(res, error, "No se pudo enviar el comando por RCON");
   }
 });
 
 // =========================
 // PLAYERS
 // =========================
+
 router.get("/api/servers/:id/players", async (req, res) => {
   try {
-    const server = serversJSON
-      .getServers()
-      .find(s => s.id === req.params.id);
+    const server = findServer(req.params.id);
 
     if (!server) {
       return res.status(404).json({
@@ -191,11 +254,14 @@ router.get("/api/worlds", async (req, res) => {
     handleError(res, error, "No se pudieron obtener los mundos");
   }
 });
+
+// =========================
+// RCON
+// =========================
+
 router.post("/api/servers/:id/rcon/ensure", (req, res) => {
   try {
-    const server = serversJSON
-      .getServers()
-      .find(server => server.id === req.params.id);
+    const server = findServer(req.params.id);
 
     if (!server) {
       return res.status(404).json({
@@ -219,4 +285,5 @@ router.post("/api/servers/:id/rcon/ensure", (req, res) => {
     handleError(res, error, "No se pudo configurar RCON");
   }
 });
+
 module.exports = router;
