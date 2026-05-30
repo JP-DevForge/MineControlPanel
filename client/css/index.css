@@ -108,7 +108,11 @@ body {
 
   box-shadow: 0 0 1rem rgba(0, 212, 255, 0.25);
 }
-
+.server-info {
+  position: relative;
+  flex: 1;
+  padding-right: 180px;
+}
 .server-info h3 {
   margin: 0 0 0.4rem;
 
@@ -356,4 +360,36 @@ body {
 
 .boton-volver:active {
   transform: scale(0.96);
+}
+
+
+/*ESTADO*/
+.server-item {
+  position: relative;
+}
+.server-status {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  padding: 0.35rem 0.9rem;
+
+  border-radius: 999px;
+
+  font-size: 1.2rem;
+  font-weight: 600;
+
+  transition: all 0.2s ease;
+}
+
+.status-online {
+  color: #7ee0a3;
+}
+
+.status-offline {
+  color: #e18b8b;
+}
+
+.status-unknown {
+  color: #bdbdbd;
 }

@@ -191,75 +191,70 @@ function setupEvents() {
 
 async function changeBackupPath() {
   const current =
-    document.getElementById("backup-path")
-      .textContent;
+    document.getElementById("backup-path").textContent;
 
   const newPath = prompt(
     "Ruta de backups",
-    current === "No configurada"
-      ? ""
-      : current
+    current === "No configurada" ? "" : current
   );
 
   if (newPath === null) {
     return;
   }
 
-  await saveConfig({
-    backupPath: newPath
+  const saved = await saveConfig({
+    backupPath: newPath.trim()
   });
+
+  if (!saved) {
+    return;
+  }
+
+  alert("Ruta de backups guardada");
 }
 
 async function saveConfig(extra = {}) {
   try {
-    await fetch(
-      "/api/server/backups/config/save",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-        body: JSON.stringify({
-          serverId: currentServer.id,
+    const response = await fetch("/api/server/backups/config/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        serverId: currentServer.id,
 
-          backupPath:
-            extra.backupPath ??
-            document.getElementById(
-              "backup-path"
-            ).textContent,
+        backupPath:
+          extra.backupPath ??
+          document.getElementById("backup-path").textContent,
 
-          automaticBackups:
-            document.getElementById(
-              "automatic-backups"
-            ).checked,
+        automaticBackups:
+          document.getElementById("automatic-backups").checked,
 
-          backupOnStart:
-            document.getElementById(
-              "backup-on-start"
-            ).checked,
+        backupOnStart:
+          document.getElementById("backup-on-start").checked,
 
-          automaticIntervalMinutes:
-            Number(
-              document.getElementById(
-                "backup-interval"
-              ).value
-            ),
+        automaticIntervalMinutes:
+          Number(document.getElementById("backup-interval").value),
 
-          maxAutomaticBackups:
-            Number(
-              document.getElementById(
-                "backup-limit"
-              ).value
-            )
-        })
-      }
-    );
+        maxAutomaticBackups:
+          Number(document.getElementById("backup-limit").value)
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      alert(data.error || "Ruta de backups no válida");
+      return false;
+    }
 
     await loadBackupConfig();
+    return true;
 
   } catch (error) {
     console.error(error);
+    alert("No se pudo guardar la configuración de backups");
+    return false;
   }
 }
 

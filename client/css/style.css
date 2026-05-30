@@ -1,157 +1,109 @@
-
 html,
 body {
     margin: 0;
     padding: 0;
     height: 100%;
 }
-main{
-      background: url("https://archive.org/download/Panoramico/Panoramico.mp4") no-repeat center center;
-}
-
-h1 {
-    margin: 2rem;
-    text-shadow: #000000 0.15rem 0.15rem 0.3rem;
-    font-size: 4rem;
-    color: #00d4ff;
-    text-shadow: 0 0 0.4rem #00d4ff;
-}
-#ip {
-    font-size: 1.3rem;
-    color: #9a9c9e;
-    opacity: 0.4;
-}
-.estado {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-
-.boton {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 2rem;
-}
-.boton button {
-    background: linear-gradient(135deg, #16213e 0%, #1a3a52 100%);
-    color: #ffffff;
-    border: none;
-    padding: 1rem 1.5rem;
-    border-radius: 15px;
-    transition: 0.25s ease;
-    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.2);
-    display: flex;
-    align-items: center;
-}
-
-.boton button:hover {
-    box-shadow: 0 0 1.5rem #00d4ff;
-    transform: translateY(-3px);
-}
-
-
-.boton button div {
-    text-align: center;
-}
-
-.boton .icono {
-    font-size: 2.5rem;
-    margin: 0;
-    line-height: 1;
-    text-shadow: 0 0 0.8rem #00d4ff;
-}
 
 body {
-    margin: 0;
     display: flex;
     flex-direction: column;
     font-size: 1.6rem;
-    background: linear-gradient(to left, #0f3460 0%, #16213e 50%, #1a3a52 100%);
-}
-
-.panorama {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -2;
+    background: linear-gradient(
+        to left,
+        #0f3460 0%,
+        #16213e 50%,
+        #1a3a52 100%
+    );
 }
 
 main {
     flex: 1;
 }
 
-article {
-    margin: 4rem;
-    color: antiquewhite;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 12px;
-    border: 1px solid #00d4ff;
-    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.3);
-    backdrop-filter: blur(4px);
-}
-
-
-nav {
-    text-shadow: #000000 0.15rem 0.15rem 0.3rem;
-    display: flex;
-    justify-content: space-between;
-}
-
-nav a {
-    text-decoration: none;
-    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+h1 {
+    margin: 2rem;
+    font-size: 4rem;
     color: #00d4ff;
-    flex: 1;
-    padding: 1rem;
-    transition: 0.3s ease;
-    border: 1px solid #00d4ff;
+    text-shadow: 0 0 0.4rem #00d4ff;
 }
 
-nav a:first-child {
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
-}
-
-nav a:last-child {
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
-nav a:hover {
-    background: linear-gradient(135deg, #16213e 0%, #1a3a52 100%);
-    color: #fff;
-    box-shadow: 0 0 1rem #00d4ff;
-}
-
-.activo {
-    background: linear-gradient(135deg, #16213e 0%, #1a3a52 100%);
-    color: #fff;
+#ip {
+    font-size: 1.3rem;
+    color: #9a9c9e;
+    opacity: 0.4;
 }
 
 header,
 footer {
-    background: linear-gradient(to right, #0f3460 0%, #16213e 50%, #1a3a52 100%);
+    background: linear-gradient(
+        to right,
+        #0f3460 0%,
+        #16213e 50%,
+        #1a3a52 100%
+    );
+
     text-align: center;
     color: #00d4ff;
 }
 
 footer {
+    border-top: 1px solid #00d4ff;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    border-top: 1px solid #00d4ff;
 }
 
-@media (width<=768) {
-    .boton button div {
-        grid-template-columns: 1fr;
+article {
+    margin: 0rem;
+    padding: 0rem;
 
-    }
+    color: antiquewhite;
+
+    background: rgba(0, 0, 0, 0.6);
+
+    border: 1px solid #00d4ff;
+    border-radius: 12px;
+
+    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.3);
+    backdrop-filter: blur(4px);
 }
 
-@media (width<=576px)and(width>576px) {}
+nav {
+    display: flex;
+    justify-content: space-between;
+}
+
+nav a {
+    flex: 1;
+
+    padding: 1rem;
+
+    text-decoration: none;
+
+    color: #00d4ff;
+
+    background: linear-gradient(
+        135deg,
+        #0f3460 0%,
+        #16213e 100%
+    );
+
+    border: 1px solid #00d4ff;
+
+    transition: 0.3s ease;
+}
+
+nav a:hover,
+.activo {
+    background: linear-gradient(
+        135deg,
+        #16213e 0%,
+        #1a3a52 100%
+    );
+
+    color: #fff;
+}
+
+.hidden {
+    display: none !important;
+}

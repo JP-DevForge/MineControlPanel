@@ -16,10 +16,9 @@
     <button id="back-home" type="button">←</button>
     <h1 class="tittle" id="server-name">MineControlPanel</h1>
 
-    <section>
-      <h2 id="server-name"></h2>
-      <p id="server-path"></p>
+    <section class="server-info">
     </section>
+
 
     <section>
       <h4 id="ip"></h4>
@@ -27,12 +26,47 @@
 
     <div class="estado">
       <section class="boton">
-        <button id="start">
-          <h2 class="icono">⏻</h2>
-        </button>
+
+          <div id="server-controls">
+
+            <button id="start" class="control-btn">
+              <h2 class="icono"> <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6.49999 0V8H9.49999V0H6.49999Z" fill="currentColor" />
+                  <path
+                    d="M4.46447 11.5355C2.51184 9.58291 2.51184 6.41709 4.46447 4.46447L2.34315 2.34315C-0.781049 5.46734 -0.781049 10.5327 2.34315 13.6569C5.46734 16.781 10.5327 16.781 13.6569 13.6569C16.781 10.5327 16.781 5.46734 13.6569 2.34315L11.5355 4.46447C13.4882 6.41709 13.4882 9.58291 11.5355 11.5355C9.58291 13.4882 6.41709 13.4882 4.46447 11.5355Z"
+                    fill="currentColor" />
+                </svg></h2>
+            </button>
+            <button id="stop" class="control-btn hidden">
+              <h2 class="icono"> <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6.49999 0V8H9.49999V0H6.49999Z" fill="currentColor" />
+                  <path
+                    d="M4.46447 11.5355C2.51184 9.58291 2.51184 6.41709 4.46447 4.46447L2.34315 2.34315C-0.781049 5.46734 -0.781049 10.5327 2.34315 13.6569C5.46734 16.781 10.5327 16.781 13.6569 13.6569C16.781 10.5327 16.781 5.46734 13.6569 2.34315L11.5355 4.46447C13.4882 6.41709 13.4882 9.58291 11.5355 11.5355C9.58291 13.4882 6.41709 13.4882 4.46447 11.5355Z"
+                    fill="currentColor" />
+                </svg></h2>
+            </button>
+<button id="restart" class="control-btn hidden">
+  <svg viewBox="0 0 24 24" fill="none"
+       xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M18.364 8.05026L17.6569 7.34315C14.5327 4.21896 9.46734 4.21896 6.34315 7.34315C3.21895 10.4673 3.21895 15.5327 6.34315 18.6569C9.46734 21.7811 14.5327 21.7811 17.6569 18.6569C19.4737 16.84 20.234 14.3668 19.9377 12.0005M18.364 8.05026H14.1213M18.364 8.05026V3.80762"
+      stroke="currentColor"
+      stroke-width="3.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</button>
+
+
+
+
+
+
+            </button>
       </section>
 
-      <h2>Estado</h2>
+      <h2 id="server-status">Comprobando...</h2>
     </div>
 
     <nav>

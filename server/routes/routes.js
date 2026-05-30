@@ -7,6 +7,10 @@ const minecraft = require("../scripts/minecraft");
 const minecraftConsole = require("../scripts/minecraftConsole");
 const properties = require("../scripts/properties");
 const {
+  getCachedStatus,
+  getAllCachedStatuses
+} = require("../scripts/statusMonitor");
+const {
   syncPlayers
 } = require("../scripts/syncjson/PlayersJSON");
 
@@ -64,7 +68,12 @@ router.get("/api/system", (req, res) => {
 router.get("/api/servers", (req, res) => {
   res.json(serversJSON.getServers());
 });
-
+router.get("/api/servers/status", (req, res) => {
+  res.json({
+    success: true,
+    servers: getAllCachedStatuses()
+  });
+});
 router.get("/api/servers/:id", (req, res) => {
   const server = findServer(req.params.id);
 
@@ -539,14 +548,14 @@ router.post("/api/server/backups/config/save", (req, res) => {
       config
     });
 
-  } catch (error) {
-    console.error(error);
+} catch (error) {
+  console.error(error);
 
-    res.status(400).json({
-      success: false,
-      error: error.message || "Error guardando configuración de backups"
-    });
-  }
+  res.status(400).json({
+    success: false,
+    error: "La ruta no es válida o no tiene permisos de escritura"
+  });
+}
 });
 router.post("/api/server/backups/test-path", (req, res) => {
   try {
@@ -558,11 +567,33 @@ router.post("/api/server/backups/test-path", (req, res) => {
       success: true
     });
 
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: "La ruta no es válida o no tiene permisos de escritura"
-    });
-  }
+} catch (error) {
+  console.error(error);
+
+  res.status(400).json({
+    success: false,
+    error: "El path no es válida o no tiene permisos de escritura"
+  });
+}
+});
+
+router.get("/api/server/status/:id", (req, res) => {
+  res.json({
+    success: true,
+    ...getCachedStatus(req.params.id)
+  });
+});
+router.get("/api/server/status/:id", (req, res) => {
+  res.json({
+    success: true,
+    ...getCachedStatus(req.params.id)
+  });
+});
+
+router.get("/api/servers/status", (req, res) => {
+  res.json({
+    success: true,
+    servers: getAllCachedStatuses()
+  });
 });
 module.exports = router;

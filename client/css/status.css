@@ -1,0 +1,107 @@
+.estado {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    width: fit-content;
+
+    margin: 2rem auto;
+
+    padding: 0.5rem 0.5rem;
+
+    border-radius: 16px;
+
+    background: rgba(15, 52, 96, 0.35);
+
+    transition: 0.2s ease;
+}
+
+.estado-online {
+    border: 1px solid rgba(126, 224, 163, 0.7);
+
+    box-shadow:
+        0 0 1.2rem rgba(126, 224, 163, 0.25);
+}
+
+.estado-offline {
+    border: 1px solid rgba(225, 139, 139, 0.7);
+
+    box-shadow:
+        0 0 1.2rem rgba(225, 139, 139, 0.25);
+}
+
+.estado-unknown {
+    border: 1px solid rgba(255, 190, 100, 0.7);
+
+    box-shadow:
+        0 0 1.2rem rgba(255, 190, 100, 0.25);
+}
+
+#server-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.estado button {
+    width: 4.8rem;
+    height: 4.8rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #00d4ff;
+    border-radius: 14px;
+
+    background: rgba(15, 52, 96, 0.65);
+
+    color: #00d4ff;
+
+    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.25);
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.estado button:hover {
+    background: rgba(0, 212, 255, 0.12);
+
+    box-shadow: 0 0 1.4rem rgba(0, 212, 255, 0.45);
+
+    transform: scale(1.05);
+}
+
+.estado svg {
+    width: 2rem;
+    height: 2rem;
+}
+#restart svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+#restart {
+  color: #00d4ff;
+}
+#server-status {
+    margin: 0;
+
+    font-size: 2rem;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.status-online {
+    color: #7ee0a3;
+}
+
+.status-offline {
+    color: #e18b8b;
+}
+
+.status-unknown {
+    color: #ffc46b;
+}

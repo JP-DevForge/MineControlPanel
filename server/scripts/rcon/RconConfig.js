@@ -100,7 +100,27 @@ function ensureRconConfig(server) {
     }
   };
 }
+const serversJSON = require("../syncjson/ServersJSON");
 
+function getFreeRconPort(currentServerId = null) {
+  const servers = serversJSON.getServers();
+
+  const usedPorts = new Set(
+    servers
+      .filter(server => server.id !== currentServerId)
+      .map(server => Number(server.rconPort))
+      .filter(Boolean)
+  );
+
+  let port = 25575;
+
+  while (usedPorts.has(port)) {
+    port++;
+  }
+
+  return port;
+}
 module.exports = {
-  ensureRconConfig
+  ensureRconConfig,
+  getFreeRconPort
 };

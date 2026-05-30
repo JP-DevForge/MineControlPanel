@@ -2,7 +2,7 @@
   {
     "id": "7785ec93-15a6-421b-b047-befbeeff5ec6",
     "type": "local",
-    "name": "server",
+    "name": "IES Cura Valera",
     "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/server/",
     "jar": "server.jar",
     "port": 25565,
@@ -17,7 +17,7 @@
   {
     "id": "6d1f630a-2100-47b3-80d6-517830628ea3",
     "type": "local",
-    "name": "servidor",
+    "name": "Servidor",
     "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/servidor/",
     "jar": "server.jar",
     "port": 25565,

@@ -181,7 +181,11 @@ async function sendCommand(server, command) {
 
   return response;
 }
+async function checkConnection(server) {
+  const connection = await getRconConnection(server);
 
+  return true;
+}
 function startServer(server) {
   if (mcRunning) {
     throw new Error("El servidor ya está iniciado");
@@ -197,7 +201,7 @@ function startServer(server) {
     throw new Error(`No existe el jar: ${jarPath}`);
   }
 
-  const child = spawn("java", ["-jar", server.jar, "nogui"], {
+  const child = spawn("java", ["-jar", server.jar], {
     cwd: server.path,
     detached: true,
     stdio: "ignore",
@@ -231,12 +235,21 @@ function isRunning() {
 function getCurrentServer() {
   return currentServer;
 }
+async function checkRcon(server) {
+  const response = await sendCommand(server, "list");
 
+  return {
+    online: true,
+    response
+  };
+}
 module.exports = {
+  checkConnection,
   startServer,
   stopServer,
   restartServer,
   sendCommand,
+  checkRcon,
   readConsole,
   isRunning,
   getCurrentServer
