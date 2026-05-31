@@ -1,11 +1,14 @@
 const express = require("express");
 const os = require("os");
+const fs = require("fs");
 const backups = require("../scripts/backup");
 const serversJSON = require("../scripts/syncjson/ServersJSON");
 const syncWorlds = require("../scripts/syncjson/WorldsJSON");
 const minecraft = require("../scripts/minecraft");
 const minecraftConsole = require("../scripts/minecraftConsole");
 const properties = require("../scripts/properties");
+const systemInfo =
+  require("../scripts/Info/SystemInfo");
 const {
   getCachedStatus,
   getAllCachedStatuses
@@ -46,20 +49,6 @@ router.get("/api/test", (req, res) => {
   });
 });
 
-// =========================
-// SISTEMA
-// =========================
-
-router.get("/api/system", (req, res) => {
-  res.json({
-    hostname: os.hostname(),
-    platform: os.platform(),
-    uptime: os.uptime(),
-    totalMemory: os.totalmem(),
-    freeMemory: os.freemem(),
-    cpuCount: os.cpus().length
-  });
-});
 
 // =========================
 // SERVIDORES GUARDADOS
@@ -73,6 +62,9 @@ router.get("/api/servers/status", (req, res) => {
     success: true,
     servers: getAllCachedStatuses()
   });
+});
+router.get("/api/system/info", (req, res) => {
+  res.json(systemInfo.getSystemInfo());
 });
 router.get("/api/servers/:id", (req, res) => {
   const server = findServer(req.params.id);
@@ -108,12 +100,6 @@ router.delete("/api/servers/:id", (req, res) => {
 // SERVIDOR MINECRAFT
 // =========================
 
-router.get("/api/server/status", (req, res) => {
-  res.json({
-    success: true,
-    running: minecraft.isRunning()
-  });
-});
 
 router.post("/api/server/start", async (req, res) => {
   try {
@@ -140,11 +126,13 @@ router.post("/api/server/start", async (req, res) => {
     serversJSON.updateServer(savedServer.id, {
       rcon: updatedServer.rcon
     });
+
     const backupConfig = backups.getConfig(updatedServer);
 
     if (backupConfig.backupOnStart === true) {
       await backups.backup(updatedServer, "start");
     }
+
     await minecraft.startServer(updatedServer);
 
     res.json({
@@ -154,7 +142,12 @@ router.post("/api/server/start", async (req, res) => {
     });
 
   } catch (error) {
-    handleError(res, error, "No se pudo iniciar el servidor");
+    console.error(error);
+
+    res.status(400).json({
+      success: false,
+      error: error.message || "No se pudo iniciar el servidor"
+    });
   }
 });
 
@@ -578,22 +571,11 @@ router.post("/api/server/backups/test-path", (req, res) => {
 });
 
 router.get("/api/server/status/:id", (req, res) => {
-  res.json({
-    success: true,
-    ...getCachedStatus(req.params.id)
-  });
-});
-router.get("/api/server/status/:id", (req, res) => {
+  
   res.json({
     success: true,
     ...getCachedStatus(req.params.id)
   });
 });
 
-router.get("/api/servers/status", (req, res) => {
-  res.json({
-    success: true,
-    servers: getAllCachedStatuses()
-  });
-});
 module.exports = router;

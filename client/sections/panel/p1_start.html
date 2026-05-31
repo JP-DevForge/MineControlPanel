@@ -1,26 +1,25 @@
-<main>
- 
-    <div class="inicio">
+<section class="status-page">
+  <h2>Estado</h2>
 
-        <h2>Bienvenido a MineControlPanel</h2>
+  <article class="status-card">
+    <h3>Servidor</h3>
 
-        <p>
-            MineControlPanel es el panel de administración de nuestro servidor de Minecraft.
-            Desde aquí podrás consultar información del servidor, visualizar el mapa del mundo
-            en tiempo real y gestionar distintos aspectos del servidor.
-        </p>
+    <p><strong>Dirección:</strong> <span id="status-server-address">Cargando...</span></p>
+    <p><strong>Versión:</strong> <span id="status-server-version">Cargando...</span></p>
+  </article>
 
-        <p>
-            Este proyecto ha sido desarrollado para facilitar la administración del servidor
-            mediante una interfaz web simple e intuitiva.
-        </p>
+  <article class="status-card">
+    <h3>Sistema</h3>
 
-        <ul>
-            <li>Ver la ip del servidor de Minecraft en local</li>
-            <li>Administrar la terminal del servidor</li>
-            <li> Consultar jugadores conectados</li>
-            <li> Administrar configuraciones del servidor</li>
-        </ul>
+    <p><strong>Equipo:</strong> <span id="status-system-hostname">Cargando...</span></p>
+    <p><strong>Sistema:</strong> <span id="status-system-platform">Cargando...</span></p>
+    <p><strong>CPU:</strong> <span id="status-system-cpu">Cargando...</span></p>
+    <p><strong>Núcleos:</strong> <span id="status-system-cores">Cargando...</span></p>
+    <p><strong>RAM:</strong> <span id="status-system-ram">Cargando...</span></p>
+    <p><strong>Temperatura CPU:</strong> <span id="status-system-temp">Cargando...</span></p>
+    <p><strong>Tiempo encendido:</strong> <span id="status-system-uptime">Cargando...</span></p>
+  </article>
+</section>
 
-    </div>
-</main>
+
+<script type="module" src="/js/panel/info.js"></script>

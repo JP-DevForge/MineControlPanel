@@ -1,10 +1,10 @@
 const startButton = document.getElementById("start");
 const stopButton = document.getElementById("stop");
-const restartButton = document.getElementById("restart");
+
+let statusLockUntil = 0;
 
 startButton?.addEventListener("click", startServer);
 stopButton?.addEventListener("click", stopServer);
-restartButton?.addEventListener("click", restartServer);
 
 function getActiveServer() {
   const activeServerRaw =
@@ -17,8 +17,29 @@ function getActiveServer() {
   return JSON.parse(activeServerRaw);
 }
 
+function setTemporaryStatus(text, seconds = 30) {
+  const statusElement =
+    document.getElementById("server-status");
+
+  if (!statusElement) {
+    return;
+  }
+
+  statusLockUntil =
+    Date.now() + (seconds * 1000);
+
+  statusElement.textContent = text;
+  statusElement.className = "status unknown";
+}
+
+function isStatusLocked() {
+  return Date.now() < statusLockUntil;
+}
+
 async function startServer() {
   try {
+    setTemporaryStatus("Encendiendo...", 30);
+
     const activeServer = getActiveServer();
 
     const response = await fetch("/api/server/start", {
@@ -34,17 +55,28 @@ async function startServer() {
     const data = await response.json();
 
     if (!response.ok) {
-      alert(data.message || "No se pudo iniciar el servidor");
+      statusLockUntil = 0;
+
+      alert(
+        data.error ||
+        "No se pudo iniciar el servidor"
+      );
+
       return;
     }
   } catch (error) {
+    statusLockUntil = 0;
+
     console.error(error);
+
     alert("Error iniciando el servidor");
   }
 }
 
 async function stopServer() {
   try {
+    setTemporaryStatus("Apagando...", 30);
+
     const activeServer = getActiveServer();
 
     const response = await fetch("/api/server/command", {
@@ -52,63 +84,31 @@ async function stopServer() {
       headers: {
         "Content-Type": "application/json"
       },
-body: JSON.stringify({
-  id: activeServer.id,
-  command: "stop"
-})
+      body: JSON.stringify({
+        id: activeServer.id,
+        command: "stop"
+      })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      alert(data.error || "No se pudo apagar el servidor");
+      statusLockUntil = 0;
+
+      alert(
+        data.error ||
+        "No se pudo apagar el servidor"
+      );
+
+      return;
     }
   } catch (error) {
+    statusLockUntil = 0;
+
     console.error(error);
+
     alert("Error apagando el servidor");
   }
 }
 
-async function restartServer() {
-  try {
-    const activeServer = getActiveServer();
-
-    await fetch("/api/server/command", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        server: activeServer,
-        command: "stop"
-      })
-    });
-
-    const waitUntilOffline = setInterval(async () => {
-      const response = await fetch(
-        `/api/server/status/${activeServer.id}`
-      );
-
-      const status = await response.json();
-
-      if (status.status !== "offline") {
-        return;
-      }
-
-      clearInterval(waitUntilOffline);
-
-      await fetch("/api/server/start", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          server: activeServer
-        })
-      });
-    }, 1000);
-  } catch (error) {
-    console.error(error);
-    alert("Error reiniciando el servidor");
-  }
-}
+window.isStatusLocked = isStatusLocked;

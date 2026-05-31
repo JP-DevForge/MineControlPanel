@@ -153,7 +153,7 @@ function startStatusMonitor() {
 
   monitorOnce();
 
-  monitorInterval = setInterval(monitorOnce, 5000);
+  monitorInterval = setInterval(monitorOnce, 500);
 }
 
 function getCachedStatus(serverId) {

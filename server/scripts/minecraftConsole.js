@@ -66,7 +66,6 @@ function appendPanelConsole(server, text) {
     "utf8"
   );
 }
-
 function parseMinecraftLogDate(line) {
   const match = line.match(/^\[(\d{2}):(\d{2}):(\d{2})\]/);
 
@@ -74,16 +73,23 @@ function parseMinecraftLogDate(line) {
     return null;
   }
 
-  const date = new Date();
+  const now = new Date();
 
-  date.setHours(
+  const lineDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
     Number(match[1]),
     Number(match[2]),
     Number(match[3]),
     0
   );
 
-  return date.getTime();
+  if (lineDate.getTime() > now.getTime() + 60000) {
+    lineDate.setDate(lineDate.getDate() - 1);
+  }
+
+  return lineDate.getTime();
 }
 
 function parsePanelLogDate(line) {
@@ -243,6 +249,15 @@ async function checkRcon(server) {
     response
   };
 }
+function clearPanelConsole(server) {
+  ensureMinecontrolData(server);
+
+  fs.writeFileSync(
+    getPanelConsolePath(server),
+    "",
+    "utf8"
+  );
+}
 module.exports = {
   checkConnection,
   startServer,
@@ -252,5 +267,8 @@ module.exports = {
   checkRcon,
   readConsole,
   isRunning,
-  getCurrentServer
+  getCurrentServer,
+  readConsole,
+  sendCommand,
+  clearPanelConsole
 };

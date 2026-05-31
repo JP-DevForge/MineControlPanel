@@ -1,20 +1,44 @@
 const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+const net = require("net");
 
 const websocket = require("../websocket");
 const minecraftConsole = require("./minecraftConsole");
 
-let currentServer = null;
-let mcRunning = false;
+function isPortOpen(port, host = "127.0.0.1") {
+  return new Promise(resolve => {
+    const socket = new net.Socket();
 
-function startServer(server) {
-  if (mcRunning) {
-    throw new Error("El servidor ya está iniciado");
-  }
+    socket.setTimeout(500);
 
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
+    });
+
+    socket.once("timeout", () => {
+      socket.destroy();
+      resolve(false);
+    });
+
+    socket.once("error", () => {
+      resolve(false);
+    });
+
+    socket.connect(port, host);
+  });
+}
+
+async function startServer(server) {
   if (!server || !server.path || !server.jar) {
     throw new Error("Faltan path o jar del servidor");
+  }
+
+  const port = Number(server.port) || 25565;
+
+  if (await isPortOpen(port)) {
+    throw new Error("El servidor ya está iniciado");
   }
 
   const jarPath = path.join(server.path, server.jar);
@@ -22,7 +46,7 @@ function startServer(server) {
   if (!fs.existsSync(jarPath)) {
     throw new Error(`No existe el jar: ${jarPath}`);
   }
-
+minecraftConsole.clearPanelConsole(server);
   const child = spawn("java", ["-jar", server.jar, "nogui"], {
     cwd: server.path,
     detached: true,
@@ -31,9 +55,6 @@ function startServer(server) {
   });
 
   child.unref();
-
-  currentServer = server;
-  mcRunning = true;
 
   websocket.broadcastConsole(
     `Servidor iniciado de forma independiente: ${server.name}\n`
@@ -46,17 +67,7 @@ async function sendCommand(server, command) {
   return minecraftConsole.sendCommand(server, command);
 }
 
-function isRunning() {
-  return mcRunning;
-}
-
-function getCurrentServer() {
-  return currentServer;
-}
-
 module.exports = {
   startServer,
-  sendCommand,
-  isRunning,
-  getCurrentServer
+  sendCommand
 };

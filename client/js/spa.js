@@ -1,6 +1,8 @@
 import { getCurrentServer } from "./panel/currentServer.js";
 import { renderConfig } from "./panel/config.js";
 import { iniciarBackups } from "./panel/backups.js";
+import { initInfo } from "./panel/info.js";
+
 const contentDiv = document.getElementById("content");
 
 const cssMap = {
@@ -13,14 +15,19 @@ const cssMap = {
 };
 
 const sectionInitMap = {
+  p1_start: "initInfo",
   p2_console: "iniciarConsole",
   p3_config: "iniciarConfigPage",
   p4_players: "iniciarPlayers"
 };
+
+window.initInfo = initInfo;
+
 window.iniciarConfigPage = function () {
   iniciarConfig();
   iniciarBackups();
 };
+
 window.iniciarConfig = async function () {
   const server = await getCurrentServer();
 
@@ -42,7 +49,9 @@ export async function loadPanelSection(name) {
     const response = await fetch(`/sections/panel/${name}.html`);
 
     if (!response.ok) {
-      throw new Error(`No se pudo cargar /sections/panel/${name}.html`);
+      throw new Error(
+        `No se pudo cargar /sections/panel/${name}.html`
+      );
     }
 
     contentDiv.innerHTML = await response.text();
