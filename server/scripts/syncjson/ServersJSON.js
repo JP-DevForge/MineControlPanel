@@ -42,24 +42,45 @@ function saveServers(servers) {
 function addServer(data) {
   const servers = getServers();
 
+  const serverPath = data.path;
+  const jarName = data.jar;
+
+  if (!serverPath || !jarName) {
+    throw new Error("Faltan la ruta del servidor o el archivo .jar");
+  }
+
+  const jarPath = path.join(serverPath, jarName);
+
+  if (!fs.existsSync(jarPath)) {
+    throw new Error(`El archivo jar no existe: ${jarPath}`);
+  }
+
+  if (!fs.statSync(jarPath).isFile()) {
+    throw new Error(`La ruta no es un archivo jar válido: ${jarPath}`);
+  }
+
   const server = {
     id: crypto.randomUUID(),
     type: data.type || "local",
-    version: data.version || null,
     name: data.name,
     path: data.path,
     jar: data.jar,
-    port: data.port,
+    port: data.port || 25565,
+    version: data.version || null,
+    rcon: data.rcon || {
+      enabled: true,
+      host: "127.0.0.1",
+      port: 25575,
+      password: ""
+    },
     createdAt: new Date().toISOString()
   };
 
   servers.push(server);
-
   saveServers(servers);
 
   return server;
 }
-
 function removeServer(id) {
   const servers = getServers().filter(
     server => server.id !== id

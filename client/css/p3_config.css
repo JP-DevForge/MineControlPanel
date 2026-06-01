@@ -1,3 +1,16 @@
+#config-properties,
+#config-backups {
+    width: 100%;
+        display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* =========================
+   CONFIG PROPERTIES
+========================= */
+
 #config-options {
     width: 95%;
     padding: 1.5rem;
@@ -7,19 +20,26 @@
     gap: 1.5rem;
     align-items: start;
 
+    color: white;
     background: rgba(0, 0, 0, 0.45);
+
     border: 1px solid #00d4ff;
     border-radius: 16px;
+
     box-shadow: 0 0 1.2rem rgba(0, 212, 255, 0.25);
     backdrop-filter: blur(4px);
 }
 
-/* Grupo desplegable */
+#config-options * {
+    color: white;
+}
+
 .config-group {
     width: 100%;
     height: fit-content;
 
     background: rgba(0, 0, 0, 0.3);
+
     border: 1px solid #00d4ff;
     border-radius: 12px;
 
@@ -50,14 +70,11 @@
 
 .config-group summary::before {
     content: "▶";
+    color: #00d4ff;
 }
 
 .config-group[open] summary::before {
     content: "▼";
-}
-
-.config-group summary span:first-child {
-    flex: 1;
 }
 
 .config-count {
@@ -74,13 +91,12 @@
     text-align: center;
 }
 
-/* Opciones dentro de cada grupo */
-
 .options-grid {
     display: grid;
     grid-template-columns: 1fr;
     row-gap: 1rem;
     justify-items: center;
+
     padding: 1rem;
     overflow: hidden;
 
@@ -88,7 +104,7 @@
         height 0.3s ease,
         opacity 0.2s ease;
 }
-/* Tarjeta de opción */
+
 .option {
     width: 270px;
     min-height: 58px;
@@ -105,10 +121,17 @@
 
     border-radius: 12px;
     border: 1px solid #00d4ff;
-    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.3);
 
+    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.3);
     backdrop-filter: blur(4px);
+
     box-sizing: border-box;
+}
+
+.option p,
+.option label,
+.option span {
+    color: white;
 }
 
 .option p {
@@ -121,41 +144,99 @@
     line-height: 1.2;
 }
 
-/* Inputs */
+/* =========================
+   INPUTS
+========================= */
+
 .option select,
-.option input[type="text"] {
-    width: 145px;
+.option input[type="text"],
+.option input[type="number"],
+.number {
     box-sizing: border-box;
 
-    background-color: #1f2a33;
     color: white;
-
-    font-size: 16px;
-    padding: 8px 10px;
+    background-color: #1f2a33;
 
     border-radius: 0.5rem;
     border: 1px solid #00d4ff;
 
-    cursor: pointer;
+    font-size: 16px;
+    padding: 8px 10px;
+
+    outline: none;
+}
+
+.option select,
+.option input[type="text"] {
+    width: 145px;
 }
 
 .number {
     width: 85px;
     min-width: 85px;
-    box-sizing: border-box;
-
-    color: white;
-    background-color: #1f2a33;
-
-    border-radius: 0.2rem;
-    border: 1px solid #00d4ff;
-
-    font-size: 16px;
-    padding: 8px 6px;
     text-align: center;
 }
 
-/* Switch */
+.option select:focus,
+.option input:focus,
+.number:focus {
+    box-shadow: 0 0 0.5rem rgba(0, 212, 255, 0.6);
+}
+
+/* =========================
+   BOTONES
+========================= */
+
+.primary-button,
+#save-config,
+#edit-backup-path,
+#create-backup,
+.backup-actions button {
+    padding: 0.7rem 1.2rem;
+
+    color: white;
+    background: rgba(0, 212, 255, 0.18);
+
+    border: 1px solid #00d4ff;
+    border-radius: 10px;
+
+    font-size: 1rem;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 0 0.8rem rgba(0, 212, 255, 0.25);
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.1s ease;
+}
+
+.primary-button:hover,
+#save-config:hover,
+#edit-backup-path:hover,
+#create-backup:hover,
+.backup-actions button:hover {
+    background: rgba(0, 212, 255, 0.35);
+    box-shadow: 0 0 1rem rgba(0, 212, 255, 0.5);
+}
+
+.primary-button:active,
+#save-config:active,
+#edit-backup-path:active,
+#create-backup:active,
+.backup-actions button:active {
+    transform: scale(0.97);
+}
+
+#save-config {
+    margin-bottom: 1rem;
+}
+
+/* =========================
+   SWITCH
+========================= */
+
 .switch {
     position: relative;
     display: inline-block;
@@ -208,13 +289,9 @@
     background-color: white;
 }
 
-
-
-
-
-
-
-
+/* =========================
+   BACKUPS
+========================= */
 
 .backup-container {
     width: 95%;
@@ -222,6 +299,7 @@
     margin: auto;
     padding: 1.5rem;
 
+    color: white;
     background: rgba(0, 0, 0, 0.45);
 
     border: 1px solid #00d4ff;
@@ -230,10 +308,15 @@
     box-shadow: 0 0 1rem rgba(0, 212, 255, 0.25);
 }
 
+.backup-container * {
+    color: white;
+}
+
 .backup-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 
     margin-bottom: 1.5rem;
 }
@@ -246,6 +329,7 @@
 #backup-path {
     margin-top: 0.5rem;
     color: white;
+    opacity: 0.85;
 }
 
 .backup-storage {
@@ -257,6 +341,7 @@
 #backup-size {
     color: #00d4ff;
     font-size: 1.2rem;
+    font-weight: bold;
 }
 
 #backup-list {
@@ -271,9 +356,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 
     padding: 0.75rem 1rem;
 
+    color: white;
     background: rgba(0, 0, 0, 0.4);
 
     border: 1px solid #00d4ff;
@@ -294,6 +381,7 @@
 .backup-setting {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.75rem;
 
     color: white;
@@ -303,4 +391,57 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+}
+
+/* =========================
+   MENSAJES
+========================= */
+
+.empty-message {
+    color: white;
+    opacity: 0.75;
+    text-align: center;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1400px) {
+    #config-options {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1100px) {
+    #config-options {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 800px) {
+    #config-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .backup-header,
+    .backup-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .backup-storage {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 550px) {
+    #config-options {
+        grid-template-columns: 1fr;
+    }
+
+    .option {
+        width: 100%;
+    }
 }

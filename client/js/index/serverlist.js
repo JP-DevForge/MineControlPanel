@@ -76,7 +76,7 @@ function getServerDescription(server) {
   const serverPath = server.path || "";
   const jar = server.jar || "";
 
-  return `${escapeHtml(serverPath)} ${escapeHtml(jar)}`;
+  return `${escapeHtml(serverPath)}${escapeHtml(jar)}`;
 }
 
 function startStatusPolling() {

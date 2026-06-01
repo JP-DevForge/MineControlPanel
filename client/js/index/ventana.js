@@ -1,7 +1,7 @@
 import { loadSection } from "./selection.js";
 import { renderServers } from "./serverlist.js";
 import { addLocalServer } from "./botones.js";
-
+import { initCreateServer } from "./createServer.js";
 export async function renderHome() {
   if (!await loadSection("selector", "home")) {
     return;
@@ -37,7 +37,5 @@ export async function showCreateServerScreen() {
     return;
   }
 
-  document
-    .getElementById("back-home")
-    ?.addEventListener("click", renderHome);
+  initCreateServer();
 }

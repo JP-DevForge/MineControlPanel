@@ -119,11 +119,7 @@ function renderBackups(backups) {
 
       <div class="backup-actions">
 
-        <button
-          class="restore-backup"
-          data-id="${backup.id}">
-          Restaurar
-        </button>
+
 
         <button
           class="delete-backup"
@@ -137,7 +133,11 @@ function renderBackups(backups) {
     container.appendChild(item);
   });
 }
-
+/*        <button
+          class="restore-backup"
+          data-id="${backup.id}">
+          Restaurar
+        </button>*/
 function setupEvents() {
   document
     .getElementById("edit-backup-path")

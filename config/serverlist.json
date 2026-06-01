@@ -1,33 +1,66 @@
 [
   {
-    "id": "7785ec93-15a6-421b-b047-befbeeff5ec6",
+    "id": "2a5d1115-e299-427c-8a1f-afe5c5e0128b",
     "type": "local",
-    "name": "IES Cura Valera",
+    "name": "otro mas",
+    "path": "/home/ponce/s",
+    "jar": "server.jar",
+    "port": 25565,
+    "version": null,
+    "rcon": {
+      "enabled": true,
+      "host": "127.0.0.1",
+      "port": 25575,
+      "password": "V-RRgGRlS3Fwgdh7dlq7T4Zm"
+    },
+    "createdAt": "2026-06-01T21:43:03.058Z"
+  },
+  {
+    "id": "2a42c5e0-407b-4ee9-a407-05dcc0954b3c",
+    "type": "local",
+    "name": "server",
     "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/server/",
     "jar": "server.jar",
     "port": 25565,
-    "createdAt": "2026-05-28T12:24:54.869Z",
+    "version": "Paper 1.21.11",
     "rcon": {
       "enabled": true,
       "host": "127.0.0.1",
       "port": 25575,
       "password": "vKacx0VKE-EhRYIzmJawTwr-"
-    }
+    },
+    "createdAt": "2026-06-01T21:45:31.682Z"
   },
   {
-    "id": "6d1f630a-2100-47b3-80d6-517830628ea3",
+    "id": "f95efe43-2048-4b2a-9fee-032cfbece9a2",
     "type": "local",
-    "name": "Servidor",
-    "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/servidor/",
+    "name": "otro mas",
+    "path": "/home/ponce/s1",
     "jar": "server.jar",
     "port": 25565,
-    "createdAt": "2026-05-28T13:51:12.572Z",
+    "version": "26.1.2",
     "rcon": {
       "enabled": true,
       "host": "127.0.0.1",
       "port": 25575,
-      "password": "sjDNRBVWLgzpRAl7tEXDxOYC"
+      "password": "bwdrkgXknzHZ39zW0xai19gE"
     },
-    "version": "1.21.4"
+    "createdAt": "2026-06-01T21:56:17.278Z"
+  },
+  {
+    "id": "d9f29234-2564-4c6a-be7b-7c8b4b8f54f0",
+    "type": "local",
+    "name": "Ies",
+    "path": "/home/ponce/user",
+    "jar": "server.jar",
+    "port": 25565,
+    "version": "1.16",
+    "rcon": {
+      "enabled": true,
+      "host": "127.0.0.1",
+      "port": 25575,
+      "password": "EDbAx-hTsm6WbkRqujn3XxBt"
+    },
+    "createdAt": "2026-06-01T22:00:28.613Z"
   }
 ]

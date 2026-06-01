@@ -2,7 +2,6 @@ html,
 body {
   width: 100%;
   height: 100%;
-  overflow: hidden;
   
 }
 
@@ -29,7 +28,6 @@ body {
 
   padding: 1.5rem;
 
-  overflow: hidden;
 }
 
 .ventana {
@@ -392,4 +390,17 @@ body {
 
 .status-unknown {
   color: #bdbdbd;
+}
+
+
+/*CREATE SERVER*/
+.create-server {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+#create-server-message {
+  min-height: 2rem;
+  color: #bdefff;
 }

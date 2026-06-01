@@ -1,25 +1,57 @@
 <section class="status-page">
-  <h2>Estado</h2>
 
   <article class="status-card">
-    <h3>Servidor</h3>
+    <h2>Servidor</h2>
 
-    <p><strong>Dirección:</strong> <span id="status-server-address">Cargando...</span></p>
-    <p><strong>Versión:</strong> <span id="status-server-version">Cargando...</span></p>
+    <div class="status-grid">
+      <div>
+        <span>IP</span>
+        <strong id="status-server-ip">Cargando...</strong>
+      </div>
+
+      <div>
+        <span>Puerto</span>
+        <strong id="status-server-port">Cargando...</strong>
+      </div>
+
+      <div class="status-version-box">
+        <span>Versión</span>
+
+        <div class="version-row">
+          <strong id="status-server-version">Cargando...</strong>
+
+          <button id="open-version-list" type="button">
+            Actualizar
+          </button>
+        </div>
+
+        <select id="version-list" class="hidden">
+          <option value="">Cargando versiones...</option>
+        </select>
+
+        <button id="apply-version" class="hidden" type="button">
+          Aplicar versión
+        </button>
+
+        <p id="version-message"></p>
+      </div>
+    </div>
   </article>
 
   <article class="status-card">
-    <h3>Sistema</h3>
+    <h2>Hardware</h2>
 
-    <p><strong>Equipo:</strong> <span id="status-system-hostname">Cargando...</span></p>
-    <p><strong>Sistema:</strong> <span id="status-system-platform">Cargando...</span></p>
-    <p><strong>CPU:</strong> <span id="status-system-cpu">Cargando...</span></p>
-    <p><strong>Núcleos:</strong> <span id="status-system-cores">Cargando...</span></p>
-    <p><strong>RAM:</strong> <span id="status-system-ram">Cargando...</span></p>
-    <p><strong>Temperatura CPU:</strong> <span id="status-system-temp">Cargando...</span></p>
-    <p><strong>Tiempo encendido:</strong> <span id="status-system-uptime">Cargando...</span></p>
+    <div class="status-grid">
+      <div>
+        <span>RAM</span>
+        <strong id="status-system-ram">Cargando...</strong>
+      </div>
+
+      <div>
+        <span>Temperatura</span>
+        <strong id="status-system-temp">Cargando...</strong>
+      </div>
+    </div>
   </article>
+
 </section>
-
-
-<script type="module" src="/js/panel/info.js"></script>

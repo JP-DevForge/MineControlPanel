@@ -1,11 +1,67 @@
-<div class="ventana-topbar">
-  <button id="back-home" class="boton-volver">
-    ←
-  </button>
-</div>
+<section class="create-server">
+  <button id="back-home" type="button" class="boton-volver">←</button>
 
-<h1>Crear servidor</h1>
+  <h2>Crear servidor</h2>
 
-<p class="subtitulo">
-  Esta pantalla la hacemos después
-</p>
+  <form id="create-server-form" class="formulario">
+    <label>
+      Nombre
+      <input
+        id="server-name"
+        type="text"
+        placeholder="Mi servidor"
+        required
+      >
+    </label>
+
+    <label>
+      Ruta
+      <input
+        id="server-path"
+        type="text"
+        placeholder="/home/usuario/minecraft/servidor"
+        required
+      >
+    </label>
+
+    <label>
+      Tipo de servidor
+      <select id="server-create-type">
+        <option value="vanilla">Vanilla oficial</option>
+        <option value="custom">Jar personalizado</option>
+      </select>
+    </label>
+
+    <label id="vanilla-version-box">
+      Versión Vanilla
+      <select id="vanilla-version" required>
+        <option value="">Cargando versiones...</option>
+      </select>
+    </label>
+
+    <label id="custom-jar-box" class="hidden">
+      Jar personalizado
+      <input
+        id="custom-jar"
+        type="file"
+        accept=".jar"
+      >
+    </label>
+
+    <label>
+      Puerto Minecraft
+      <input
+        id="server-port"
+        type="number"
+        value="25565"
+        min="1"
+        max="65535"
+        required
+      >
+    </label>
+
+    <button type="submit" class="boton">Crear servidor</button>
+
+    <p id="create-server-message"></p>
+  </form>
+</section>

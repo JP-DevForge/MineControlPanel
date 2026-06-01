@@ -1,12 +1,18 @@
 const express = require("express");
 const os = require("os");
 const fs = require("fs");
+const path = require("path");
+const multer = require("multer");
+
+
+
 const backups = require("../scripts/backup");
 const serversJSON = require("../scripts/syncjson/ServersJSON");
 const syncWorlds = require("../scripts/syncjson/WorldsJSON");
 const minecraft = require("../scripts/minecraft");
 const minecraftConsole = require("../scripts/minecraftConsole");
 const properties = require("../scripts/properties");
+const vanillaVersions = require("../scripts/minecraft/VanillaVersions");
 const systemInfo =
   require("../scripts/Info/SystemInfo");
 const {
@@ -20,6 +26,18 @@ const {
 const {
   ensureRconConfig
 } = require("../scripts/rcon/RconConfig");
+
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    if (!file.originalname.endsWith(".jar")) {
+      return cb(new Error("Solo se permiten archivos .jar"));
+    }
+
+    cb(null, true);
+  }
+});
 
 const router = express.Router();
 
@@ -95,7 +113,269 @@ router.delete("/api/servers/:id", (req, res) => {
     success: true
   });
 });
+// =========================
+// VERSIONES VANILLA
+// =========================
 
+router.get("/api/vanilla/versions", async (req, res) => {
+  try {
+    const versions = await vanillaVersions.getVanillaVersions();
+
+    res.json({
+      success: true,
+      versions
+    });
+  } catch (error) {
+    handleError(res, error, "No se pudieron obtener las versiones de Mojang");
+  }
+});
+// =========================
+// CREAR SERVIDOR VANILLA
+// =========================
+
+router.post("/api/servers/create/vanilla", async (req, res) => {
+  try {
+    const {
+      name,
+      path: serverPath,
+      version,
+      port
+    } = req.body;
+
+    const cleanServerPath = serverPath?.trim();
+
+    if (!name || !cleanServerPath || !version) {
+      return res.status(400).json({
+        success: false,
+        error: "Faltan datos obligatorios"
+      });
+    }
+
+    if (cleanServerPath === "/") {
+      return res.status(400).json({
+        success: false,
+        error: "No puedes crear un servidor directamente en /"
+      });
+    }
+console.log("[CREAR VANILLA] Validando datos...");
+
+const minecraftPort = Number(port) || 25565;
+const rconPort = 25575;
+
+console.log("[CREAR VANILLA] Creando carpeta...");
+
+backups.testBackupPath(cleanServerPath);
+
+console.log("[CREAR VANILLA] Descargando server.jar...");
+
+const jarData =
+  await vanillaVersions.downloadVanillaServerJar(
+    version,
+    cleanServerPath
+  );
+
+console.log("[CREAR VANILLA] Creando eula.txt...");
+
+fs.writeFileSync(
+  path.join(cleanServerPath, "eula.txt"),
+  "eula=true\n"
+);
+
+console.log("[CREAR VANILLA] Guardando en serverlist.json...");
+
+const server = serversJSON.addServer({
+  type: "local",
+  name,
+  path: cleanServerPath,
+  jar: jarData.jar,
+  port: minecraftPort,
+  version,
+  rcon: {
+    enabled: true,
+    host: "127.0.0.1",
+    port: rconPort,
+    password: ""
+  }
+});
+
+console.log("[CREAR VANILLA] Servidor creado correctamente");  
+
+    res.json({
+      success: true,
+      message:
+        "Servidor Vanilla creado correctamente",
+      server
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error:
+        error.message ||
+        "No se pudo crear el servidor Vanilla"
+    });
+  }
+});
+// =========================
+// CREAR SERVIDOR CUSTOM
+// =========================
+
+router.post(
+  "/api/servers/create/custom",
+  upload.single("jar"),
+  async (req, res) => {
+    try {
+      const { name, path: serverPath, port } = req.body;
+      const jar = req.file;
+
+      const cleanServerPath = serverPath?.trim();
+
+      if (!name || !cleanServerPath || !port) {
+        return res.status(400).json({
+          success: false,
+          error: "Faltan datos obligatorios"
+        });
+      }
+
+      if (!jar) {
+        return res.status(400).json({
+          success: false,
+          error: "No se ha subido ningún archivo .jar"
+        });
+      }
+
+      if (cleanServerPath === "/") {
+        return res.status(400).json({
+          success: false,
+          error: "No puedes crear un servidor directamente en /"
+        });
+      }
+
+      backups.testBackupPath(cleanServerPath);
+
+      const safeJarName = path.basename(jar.originalname);
+      const jarPath = path.join(cleanServerPath, safeJarName);
+
+      fs.writeFileSync(jarPath, jar.buffer);
+
+      fs.writeFileSync(
+        path.join(cleanServerPath, "eula.txt"),
+        "eula=true\n"
+      );
+
+      const minecraftPort = Number(port) || 25565;
+
+      const server = serversJSON.addServer({
+        type: "local",
+        name,
+        path: cleanServerPath,
+        jar: safeJarName,
+        port: minecraftPort,
+        version: null,
+        rcon: {
+          enabled: true,
+          host: "127.0.0.1",
+          port: 25575,
+          password: ""
+        }
+      });
+
+      return res.json({
+        success: true,
+        message: "Servidor custom creado correctamente",
+        server
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      return res.status(500).json({
+        success: false,
+        error: error.message || "Error creando servidor custom"
+      });
+    }
+  }
+);
+
+// =========================
+// SERVIDOR UPGRADE
+// =========================
+
+router.post("/api/server/:id/version", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { version } = req.body;
+
+    if (!version) {
+      return res.status(400).json({
+        success: false,
+        error: "Versión no indicada"
+      });
+    }
+
+    const servers = serversJSON.getServers();
+    const server = servers.find(server => server.id === id);
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const status = getCachedStatus(server.id);
+
+    if (status.status !== "offline" && status.status !== "stopped") {
+      return res.status(400).json({
+        success: false,
+        error: "El servidor debe estar apagado"
+      });
+    }
+
+    const jarUrl = await getVanillaJarUrl(version);
+
+    const jarName = `server-${version}.jar`;
+    const jarPath = path.join(server.path, jarName);
+    const oldJarPath = server.jar
+      ? path.join(server.path, server.jar)
+      : null;
+
+    await downloadFile(jarUrl, jarPath);
+
+    if (!fs.existsSync(jarPath)) {
+      throw new Error("El jar no se ha descargado correctamente");
+    }
+
+    if (
+      oldJarPath &&
+      oldJarPath !== jarPath &&
+      fs.existsSync(oldJarPath)
+    ) {
+      fs.unlinkSync(oldJarPath);
+    }
+
+    server.jar = jarName;
+    server.version = version;
+
+    serversJSON.saveServers(servers);
+
+    res.json({
+      success: true,
+      version,
+      jar: jarName
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      error: error.message || "Error cambiando versión"
+    });
+  }
+});
 // =========================
 // SERVIDOR MINECRAFT
 // =========================
