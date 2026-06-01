@@ -5,8 +5,12 @@ const routes = require("./routes/routes");
 const setupSpaRoutes = require("./routes/spaRoutes");
 
 const app = express();
+require("dotenv").config();
 
+const cookieParser = require("cookie-parser");
+const auth = require("./scripts/auth");
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // Frontend estático
@@ -27,6 +31,7 @@ app.use("/img", express.static(
 ));
 
 // API
+app.use(auth.requireAuth);
 app.use(routes);
 
 // SPA

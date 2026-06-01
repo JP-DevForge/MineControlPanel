@@ -19,7 +19,10 @@
   "dependencies": {
     "ansi-to-html": "^0.7.2",
     "archiver": "^8.0.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "minecraft-server-util": "^5.4.4",
     "multer": "^2.1.1",
     "prismarine-nbt": "^2.8.0",

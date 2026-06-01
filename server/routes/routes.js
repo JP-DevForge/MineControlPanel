@@ -5,7 +5,7 @@ const path = require("path");
 const multer = require("multer");
 
 
-
+const auth = require("../scripts/auth");
 const backups = require("../scripts/backup");
 const serversJSON = require("../scripts/syncjson/ServersJSON");
 const syncWorlds = require("../scripts/syncjson/WorldsJSON");
@@ -68,8 +68,78 @@ router.get("/api/test", (req, res) => {
     message: "MineControlPanel API funcionando"
   });
 });
+// =========================
+// Autenticacion
+// =========================
+router.get("/api/auth/status", (req, res) => {
+  res.json({
+    success: true,
+    configured: auth.isConfigured()
+  });
+});
 
+router.post("/api/auth/setup", (req, res) => {
+  try {
+    const { password } = req.body;
 
+    auth.setup(password);
+
+    const token = auth.createToken();
+
+    res.cookie("mcp_token", token, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post("/api/auth/login", (req, res) => {
+  const { password } = req.body;
+
+  if (!auth.isConfigured()) {
+    return res.status(400).json({
+      success: false,
+      error: "El panel todavía no está configurado"
+    });
+  }
+
+  const valid = auth.verifyPassword(
+    password,
+    process.env.PANEL_PASSWORD_HASH
+  );
+
+  if (!valid) {
+    return res.status(401).json({
+      success: false,
+      error: "Contraseña incorrecta"
+    });
+  }
+
+  const token = auth.createToken();
+
+  res.cookie("mcp_token", token, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: false,
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+
+  res.json({ success: true });
+});
+
+router.post("/api/auth/logout", (req, res) => {
+  res.clearCookie("mcp_token");
+  res.json({ success: true });
+});
 // =========================
 // SERVIDORES GUARDADOS
 // =========================
