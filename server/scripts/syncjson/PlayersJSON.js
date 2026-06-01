@@ -1,6 +1,6 @@
 const fs = require("fs");
 const nbt = require("prismarine-nbt");
-
+const path = require("path");
 const minecraft = require("../minecraft");
 
 const {
@@ -213,7 +213,13 @@ function getPlayerRango(ops, uuid) {
 }
 async function updatePlayersJson(server) {
   const paths = getServerPaths(server);
+const whitelist = readJson(
+  path.join(paths.root, "whitelist.json")
+);
 
+const bannedPlayers = readJson(
+  path.join(paths.root, "banned-players.json")
+);
   ensureMinecontrolPath(server);
 
   const players = [];
@@ -241,12 +247,23 @@ async function updatePlayersJson(server) {
 
     const name = user?.name || "Unknown";
     const online = onlineNames.includes(name);
+    const isBanned = bannedPlayers.some(
+      item => item.uuid === uuid || item.name === name
+    );
 
+    const isWhitelisted = whitelist.some(
+      item => item.uuid === uuid || item.name === name
+    );
     let player = {
       uuid,
       name,
       online,
-      rango: getPlayerRango(ops, uuid),
+      rango: isBanned
+        ? "Baneado"
+        : getPlayerRango(ops, uuid),
+
+      banned: isBanned,
+      whitelisted: isWhitelisted,
       vida: null,
       comida: null,
       mundo: null,

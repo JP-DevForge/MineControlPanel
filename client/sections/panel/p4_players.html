@@ -1,17 +1,29 @@
 <section class="players-page">
-  <header class="players-header">
-    <div>
+<header class="players-header">
+  <div>
+    <div class="players-title-row">
       <h2>Jugadores</h2>
-      <p id="players-summary">Cargando jugadores...</p>
+
+      <button id="open-whitelist" type="button">
+        Whitelist
+      </button>
+
+      <label class="switch">
+        <input id="whitelist-enabled" type="checkbox">
+        <span class="slider"></span>
+      </label>
     </div>
 
-    <input
-      id="players-filter"
-      type="text"
-      placeholder="Filtrar jugador..."
-      autocomplete="off"
-    >
-  </header>
+    <p id="players-summary">Cargando jugadores...</p>
+  </div>
+
+  <input
+    id="players-filter"
+    type="text"
+    placeholder="Filtrar jugador..."
+    autocomplete="off"
+  >
+</header>
 
   <div class="players-table-wrap">
     <table class="players-table">

@@ -1,53 +1,33 @@
 let players = [];
 let filter = "";
 let refreshTimer = null;
-let eventsBound = false;
 
 const REFRESH_INTERVAL = 1000;
 
 function getCurrentServerId() {
-  const params = new URLSearchParams(window.location.search);
-
-  const queryId =
-    params.get("id") ||
-    params.get("server") ||
-    params.get("serverId") ||
-    params.get("uuid");
-
-  if (queryId) {
-    return queryId;
-  }
-
-  const match = window.location.pathname.match(
-    /\/servers\/([^/]+)|\/server\/([^/]+)|\/panel\/([^/]+)/
-  );
-
-  if (match) {
-    return match[1] || match[2] || match[3];
-  }
-
   const raw =
     sessionStorage.getItem("mcp_active_server") ||
     localStorage.getItem("mcp_active_server") ||
     sessionStorage.getItem("activeServer") ||
     localStorage.getItem("activeServer");
 
-  if (!raw) {
-    return null;
+  if (raw) {
+    try {
+      const server = JSON.parse(raw);
+      return server.id || server.uuid || server.serverId || null;
+    } catch {
+      return null;
+    }
   }
 
-  try {
-    const server = JSON.parse(raw);
+  const params = new URLSearchParams(window.location.search);
 
-    return (
-      server.id ||
-      server.uuid ||
-      server.serverId ||
-      null
-    );
-  } catch {
-    return null;
-  }
+  return (
+    params.get("id") ||
+    params.get("server") ||
+    params.get("serverId") ||
+    params.get("uuid")
+  );
 }
 
 function safe(value) {
@@ -55,17 +35,8 @@ function safe(value) {
 }
 
 function formatNumber(value) {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
   const number = Number(value);
-
-  if (!Number.isFinite(number)) {
-    return "-";
-  }
-
-  return Math.round(number);
+  return Number.isFinite(number) ? Math.round(number) : "-";
 }
 
 function formatWorld(world) {
@@ -82,9 +53,7 @@ function formatWorld(world) {
 }
 
 function formatCoords(coords) {
-  if (!coords) {
-    return "-";
-  }
+  if (!coords) return "-";
 
   const { x, y, z } = coords;
 
@@ -98,9 +67,7 @@ function formatCoords(coords) {
 function sortPlayers(list) {
   return [...list].sort((a, b) => {
     if (a.online === b.online) {
-      return String(a.name || "").localeCompare(
-        String(b.name || "")
-      );
+      return String(a.name || "").localeCompare(String(b.name || ""));
     }
 
     return a.online ? -1 : 1;
@@ -109,23 +76,21 @@ function sortPlayers(list) {
 
 function getFilteredPlayers() {
   const q = filter.toLowerCase().trim();
-  const sortedPlayers = sortPlayers(players);
+  const sorted = sortPlayers(players);
 
-  if (!q) {
-    return sortedPlayers;
-  }
+  if (!q) return sorted;
 
-  return sortedPlayers.filter(player => {
-    const coords = formatCoords(player.coordenadas);
-
+  return sorted.filter(player => {
     return [
       player.name,
       player.gamemode,
       player.rango,
       formatWorld(player.mundo),
       player.mundo,
-      coords,
-      player.online ? "online" : "offline"
+      formatCoords(player.coordenadas),
+      player.online ? "online" : "offline",
+      player.banned ? "baneado" : "",
+      player.whitelisted ? "whitelist" : ""
     ]
       .filter(Boolean)
       .join(" ")
@@ -134,73 +99,97 @@ function getFilteredPlayers() {
   });
 }
 
+async function readJsonResponse(response) {
+  const text = await response.text();
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(text || "Respuesta inválida del servidor");
+  }
+}
+
 async function sendCommand(command) {
   const serverId = getCurrentServerId();
 
   if (!serverId) {
     alert("No hay servidor seleccionado");
-    return;
+    return null;
   }
 
-  const response = await fetch(
-    "/api/server/command",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: serverId,
-        command
-      })
-    }
-  );
+  const response = await fetch("/api/server/command", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: serverId,
+      command
+    })
+  });
 
-  const data = await response.json();
+  const data = await readJsonResponse(response);
 
   if (!response.ok) {
-    throw new Error(
-      data.error || "Error enviando comando"
-    );
+    throw new Error(data.error || "Error enviando comando");
   }
 
   return data;
 }
 
-async function messagePlayer(name) {
-  const message = prompt(`Mensaje para ${name}`);
+async function loadPlayers() {
+  const serverId = getCurrentServerId();
 
-  if (!message || !message.trim()) {
+  if (!serverId) {
+    clearInterval(refreshTimer);
     return;
   }
 
-  await sendCommand(`msg ${name} ${message.trim()}`);
+  const response = await fetch(`/api/servers/${serverId}/players`);
+  const data = await readJsonResponse(response);
+
+  if (!response.ok) {
+    throw new Error(data.error || "Error cargando jugadores");
+  }
+
+  players = Array.isArray(data) ? data : [];
+
+  renderPlayers();
+}
+
+async function messagePlayer(name) {
+  const message = prompt(`Mensaje para ${name}`);
+
+  if (message?.trim()) {
+    await sendCommand(`msg ${name} ${message.trim()}`);
+  }
 }
 
 async function kickPlayer(name) {
   const reason = prompt(`Motivo para expulsar a ${name}`);
 
-  if (!reason || !reason.trim()) {
-    return;
+  if (reason?.trim()) {
+    await sendCommand(`kick ${name} ${reason.trim()}`);
+    await loadPlayers();
   }
-
-  await sendCommand(`kick ${name} ${reason.trim()}`);
 }
 
 async function banPlayer(name) {
   const reason = prompt(`Motivo para banear a ${name}`);
 
-  if (!reason || !reason.trim()) {
-    return;
+  if (reason?.trim()) {
+    await sendCommand(`ban ${name} ${reason.trim()}`);
+    await loadPlayers();
   }
+}
 
-  await sendCommand(`ban ${name} ${reason.trim()}`);
+async function unbanPlayer(name) {
+  await sendCommand(`pardon ${name}`);
+  await loadPlayers();
 }
 
 async function damagePlayer(name) {
-  const amount = Number(
-    prompt(`Daño para ${name}`)
-  );
+  const amount = Number(prompt(`Daño para ${name}`));
 
   if (!Number.isFinite(amount) || amount <= 0) {
     alert("Introduce una cantidad válida");
@@ -208,15 +197,32 @@ async function damagePlayer(name) {
   }
 
   await sendCommand(`damage ${name} ${amount}`);
+  await loadPlayers();
+}
+
+async function enableWhitelist(enabled) {
+  await sendCommand(enabled ? "whitelist on" : "whitelist off");
+}
+
+async function toggleWhitelist(name, enabled) {
+  await sendCommand(
+    enabled
+      ? `whitelist add ${name}`
+      : `whitelist remove ${name}`
+  );
+
+  await loadPlayers();
+
+  if (document.getElementById("whitelist-modal")) {
+    renderWhitelistModal();
+  }
 }
 
 function renderPlayers() {
   const tbody = document.getElementById("players-tbody");
   const summary = document.getElementById("players-summary");
 
-  if (!tbody) {
-    return;
-  }
+  if (!tbody) return;
 
   const filteredPlayers = getFilteredPlayers();
   const onlineCount = players.filter(player => player.online).length;
@@ -236,8 +242,6 @@ function renderPlayers() {
   }
 
   tbody.innerHTML = filteredPlayers.map(player => {
-    const coords = formatCoords(player.coordenadas);
-
     const onlineClass = player.online
       ? "player-online"
       : "player-offline";
@@ -250,16 +254,13 @@ function renderPlayers() {
           </span>
         </td>
 
-        <td class="player-name">
-          ${safe(player.name)}
-        </td>
-
+        <td class="player-name">${safe(player.name)}</td>
         <td>${safe(player.gamemode)}</td>
         <td>${safe(player.rango)}</td>
         <td>${formatWorld(player.mundo)}</td>
         <td>${formatNumber(player.vida)}/20</td>
         <td>${formatNumber(player.comida)}/20</td>
-        <td>${coords}</td>
+        <td>${formatCoords(player.coordenadas)}</td>
 
         <td class="players-actions-cell">
           <div class="player-actions">
@@ -281,8 +282,11 @@ function renderPlayers() {
                 : ""
             }
 
-            <button data-action="ban" data-player="${player.name}">
-              Ban
+            <button
+              data-action="${player.banned ? "unban" : "ban"}"
+              data-player="${player.name}"
+            >
+              ${player.banned ? "Unban" : "Ban"}
             </button>
           </div>
         </td>
@@ -291,105 +295,138 @@ function renderPlayers() {
   }).join("");
 }
 
-async function loadPlayers() {
-  const serverId = getCurrentServerId();
+function renderWhitelistModal() {
+  const oldModal = document.getElementById("whitelist-modal");
 
-  if (!serverId) {
-    clearInterval(refreshTimer);
-
-    const tbody = document.getElementById("players-tbody");
-    const summary = document.getElementById("players-summary");
-
-    if (summary) {
-      summary.textContent = "No hay servidor seleccionado";
-    }
-
-    if (tbody) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="9">No hay servidor seleccionado</td>
-        </tr>
-      `;
-    }
-
-    return;
+  if (oldModal) {
+    oldModal.remove();
   }
 
-  const response = await fetch(
-    `/api/servers/${serverId}/players`
-  );
+  const modal = document.createElement("div");
 
-  const data = await response.json();
+  modal.id = "whitelist-modal";
+  modal.className = "whitelist-modal";
 
-  if (!response.ok) {
-    throw new Error(
-      data.error || "Error cargando jugadores"
-    );
+  modal.innerHTML = `
+    <div class="whitelist-box">
+      <header>
+        <h3>Whitelist</h3>
+        <button id="close-whitelist" type="button">×</button>
+      </header>
+
+      <div class="whitelist-list">
+        ${sortPlayers(players).map(player => `
+          <div class="whitelist-player">
+            <span>${player.name}</span>
+
+            <label class="switch">
+              <input
+                type="checkbox"
+                data-player="${player.name}"
+                ${player.whitelisted ? "checked" : ""}
+              >
+              <span class="slider"></span>
+            </label>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeButton = document.getElementById("close-whitelist");
+
+  if (closeButton) {
+    closeButton.onclick = () => {
+      modal.remove();
+    };
   }
 
-  players = Array.isArray(data) ? data : [];
+  modal
+    .querySelectorAll("input[type='checkbox']")
+    .forEach(input => {
+      input.onchange = async () => {
+        const previousValue = !input.checked;
 
-  renderPlayers();
+        try {
+          await toggleWhitelist(
+            input.dataset.player,
+            input.checked
+          );
+        } catch (error) {
+          alert(error.message);
+          input.checked = previousValue;
+        }
+      };
+    });
 }
 
-function bindEvents() {
-  if (eventsBound) {
-    return;
-  }
-
-  eventsBound = true;
-
+function setupListeners() {
   const input = document.getElementById("players-filter");
   const tbody = document.getElementById("players-tbody");
+  const whitelistEnabled = document.getElementById("whitelist-enabled");
 
   if (input) {
-    input.addEventListener("input", () => {
+    input.oninput = () => {
       filter = input.value;
       renderPlayers();
-    });
+    };
+  }
+
+  if (whitelistEnabled) {
+    whitelistEnabled.onchange = async () => {
+      const previousValue = !whitelistEnabled.checked;
+
+      try {
+        await enableWhitelist(whitelistEnabled.checked);
+      } catch (error) {
+        alert(error.message);
+        whitelistEnabled.checked = previousValue;
+      }
+    };
   }
 
   if (tbody) {
-    tbody.addEventListener("click", async event => {
+    tbody.onclick = async event => {
       const button = event.target.closest("button[data-action]");
 
-      if (!button) {
-        return;
-      }
+      if (!button) return;
 
       const action = button.dataset.action;
       const player = button.dataset.player;
 
       try {
-        if (action === "msg") {
-          await messagePlayer(player);
-        }
-
-        if (action === "damage") {
-          await damagePlayer(player);
-        }
-
-        if (action === "kick") {
-          await kickPlayer(player);
-        }
-
-        if (action === "ban") {
-          await banPlayer(player);
-        }
+        if (action === "msg") await messagePlayer(player);
+        if (action === "damage") await damagePlayer(player);
+        if (action === "kick") await kickPlayer(player);
+        if (action === "ban") await banPlayer(player);
+        if (action === "unban") await unbanPlayer(player);
 
         await loadPlayers();
       } catch (error) {
         console.error(error);
         alert(error.message);
       }
-    });
+    };
   }
 }
+
+document.addEventListener("click", event => {
+  const button = event.target.closest("#open-whitelist");
+
+  if (!button) {
+    return;
+  }
+
+  event.preventDefault();
+  renderWhitelistModal();
+});
 
 export async function iniciarPlayers() {
   clearInterval(refreshTimer);
 
-  bindEvents();
+  setupListeners();
 
   try {
     await loadPlayers();
