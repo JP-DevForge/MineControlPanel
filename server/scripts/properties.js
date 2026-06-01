@@ -120,10 +120,18 @@ function getMotd(server) {
   const current = readProperties(server.path);
   return normalizeMotd(current.motd);
 }
+function saveProperty(serverPath, key, value) {
+  const current = readProperties(serverPath);
 
+  saveProperties(serverPath, {
+    ...current,
+    [key]: value
+  });
+}
 module.exports = {
   readProperties,
   saveProperties,
+  saveProperty,
   normalizeMotd,
   buildDefaultMotd,
   ensureDefaultMotd,

@@ -13,7 +13,9 @@ const minecraft = require("../scripts/minecraft");
 const minecraftConsole = require("../scripts/minecraftConsole");
 const properties = require("../scripts/properties");
 const vanillaVersions = require("../scripts/minecraft/VanillaVersions");
+
 const systemInfo =
+
   require("../scripts/Info/SystemInfo");
 const {
   getCachedStatus,
@@ -334,29 +336,12 @@ router.post("/api/server/:id/version", async (req, res) => {
       });
     }
 
-    const jarUrl = await getVanillaJarUrl(version);
+    const result = await vanillaVersions.downloadVanillaServerJar(
+      version,
+      server.path
+    );
 
-    const jarName = `server-${version}.jar`;
-    const jarPath = path.join(server.path, jarName);
-    const oldJarPath = server.jar
-      ? path.join(server.path, server.jar)
-      : null;
-
-    await downloadFile(jarUrl, jarPath);
-
-    if (!fs.existsSync(jarPath)) {
-      throw new Error("El jar no se ha descargado correctamente");
-    }
-
-    if (
-      oldJarPath &&
-      oldJarPath !== jarPath &&
-      fs.existsSync(oldJarPath)
-    ) {
-      fs.unlinkSync(oldJarPath);
-    }
-
-    server.jar = jarName;
+    server.jar = result.jar;
     server.version = version;
 
     serversJSON.saveServers(servers);
@@ -364,7 +349,7 @@ router.post("/api/server/:id/version", async (req, res) => {
     res.json({
       success: true,
       version,
-      jar: jarName
+      jar: result.jar
     });
 
   } catch (error) {
@@ -527,18 +512,192 @@ router.get("/api/servers/:id/players", async (req, res) => {
 // =========================
 // MUNDOS
 // =========================
+const worldsService = require("../scripts/syncjson/WorldsJSON");
 
-router.get("/api/worlds", async (req, res) => {
+router.get("/api/servers/:id/worlds", (req, res) => {
   try {
-    const worlds = await syncWorlds();
+    const server = findServer(req.params.id);
 
-    res.json(worlds);
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const data = worldsService.syncWorlds(server);
+
+    res.json({
+      success: true,
+      data
+    });
 
   } catch (error) {
-    handleError(res, error, "No se pudieron obtener los mundos");
+    handleError(res, error, "Error obteniendo mundos");
   }
 });
 
+router.post("/api/servers/:id/worlds/select", (req, res) => {
+  try {
+    const server = findServer(req.params.id);
+    const { folder } = req.body;
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    const status = getCachedStatus(server.id);
+
+    if (status.status !== "offline" && status.status !== "stopped") {
+      return res.status(400).json({
+        success: false,
+        error: "Apaga el servidor antes de cambiar de mundo"
+      });
+    }
+
+    if (!folder) {
+      return res.status(400).json({
+        success: false,
+        error: "Carpeta de mundo no indicada"
+      });
+    }
+
+    properties.saveProperty(
+      server.path,
+      "level-name",
+      folder
+    );
+
+    const data = worldsService.syncWorlds(server);
+
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    handleError(res, error, "Error seleccionando mundo");
+  }
+});
+router.post("/api/servers/:id/worlds/create", (req, res) => {
+  try {
+    const server = findServer(req.params.id);
+    const { name } = req.body;
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        error: "Nombre de mundo no indicado"
+      });
+    }
+
+    const safeName = name
+      .trim()
+      .replace(/[<>:"/\\|?*]/g, "")
+      .replace(/\s+/g, "_");
+
+    if (!safeName) {
+      return res.status(400).json({
+        success: false,
+        error: "Nombre de mundo no válido"
+      });
+    }
+
+    const worldPath = path.join(server.path, safeName);
+
+    if (fs.existsSync(worldPath)) {
+      return res.status(400).json({
+        success: false,
+        error: "Ya existe un mundo con ese nombre"
+      });
+    }
+
+    fs.mkdirSync(worldPath, { recursive: true });
+
+    const data = worldsService.syncWorlds(server);
+
+    res.json({
+      success: true,
+      folder: safeName,
+      data
+    });
+
+  } catch (error) {
+    handleError(res, error, "Error creando mundo");
+  }
+});
+router.post("/api/servers/:id/worlds/delete", (req, res) => {
+  try {
+    const server = findServer(req.params.id);
+    const { folder } = req.body;
+
+    if (!server) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor no encontrado"
+      });
+    }
+
+    if (!folder) {
+      return res.status(400).json({
+        success: false,
+        error: "Mundo no indicado"
+      });
+    }
+
+    const worldPath = path.join(
+      server.path,
+      folder
+    );
+
+    if (!fs.existsSync(worldPath)) {
+      return res.status(404).json({
+        success: false,
+        error: "El mundo no existe"
+      });
+    }
+
+    const activeWorld =
+      properties.readProperties(server.path)["level-name"];
+
+    if (activeWorld === folder) {
+      return res.status(400).json({
+        success: false,
+        error: "No puedes borrar el mundo activo"
+      });
+    }
+
+    fs.rmSync(worldPath, {
+      recursive: true,
+      force: true
+    });
+
+    const data =
+      worldsService.syncWorlds(server);
+
+    res.json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    handleError(
+      res,
+      error,
+      "Error borrando mundo"
+    );
+  }
+});
 // =========================
 // RCON
 // =========================

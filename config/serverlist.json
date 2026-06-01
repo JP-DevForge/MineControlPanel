@@ -54,7 +54,7 @@
     "path": "/home/ponce/user",
     "jar": "server.jar",
     "port": 25565,
-    "version": "1.16",
+    "version": "26.1.2",
     "rcon": {
       "enabled": true,
       "host": "127.0.0.1",

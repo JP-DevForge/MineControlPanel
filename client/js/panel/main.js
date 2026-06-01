@@ -1,5 +1,6 @@
 import "./console.js";
 import "./players.js";
+import { initWorlds } from "./worlds.js";
 import { initPanelWindow } from "./ventana.js";
 
 document.addEventListener("DOMContentLoaded", () => {

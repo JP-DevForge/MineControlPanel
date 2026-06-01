@@ -1,4 +1,5 @@
 import { loadPanelSection } from "../spa.js";
+import { initWorlds } from "./worlds.js";
 
 let statusInterval = null;
 
@@ -8,7 +9,7 @@ export function initPanelWindow(server) {
   bindBackButton();
   startStatusPolling(server.id);
 
-  loadPanelSection(getCurrentSection());
+  loadAndInitSection(getCurrentSection());
 }
 
 function renderPanelHeader(server) {
@@ -27,12 +28,12 @@ function bindPanelNav() {
       const section = link.dataset.panelSection;
 
       history.pushState({ section }, "", `#${section}`);
-      loadPanelSection(section);
+      loadAndInitSection(section);
     });
   });
 
   window.addEventListener("popstate", () => {
-    loadPanelSection(getCurrentSection());
+    loadAndInitSection(getCurrentSection());
   });
 }
 
@@ -44,6 +45,16 @@ function bindBackButton() {
 
 function getCurrentSection() {
   return location.hash.replace("#", "") || "p1_start";
+}
+
+async function loadAndInitSection(section) {
+  await loadPanelSection(section);
+
+  switch (section) {
+    case "p5_worlds":
+      initWorlds();
+      break;
+  }
 }
 
 function startStatusPolling(serverId) {
