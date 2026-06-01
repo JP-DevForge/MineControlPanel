@@ -1,28 +1,39 @@
-<main>
- 
-    <div class="bar">
-        <button onclick="updatePlayers()">🔃</button> <label>
-            Filtrar:
-            <input id="filter" type="search" placeholder="Buscar jugador..." autocomplete="off" />
-        </label>
-        <span id="count"></span>
+<section class="players-page">
+  <header class="players-header">
+    <div>
+      <h2>Jugadores</h2>
+      <p id="players-summary">Cargando jugadores...</p>
     </div>
-    <table class="players" aria-label="Listado de jugadores">
-        <thead>
-            <tr>
-                <th>skin</th>
-                <th>Jugador</th>
-                <th>Modo de Juego</th>
-                <th>Rango</th>
-                <th>Mundo</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            <tr>
-                <td colspan="6" class="muted">Cargando...</td>
-            </tr>
-        </tbody>
-    </table>
 
-</main>
+    <input
+      id="players-filter"
+      type="text"
+      placeholder="Filtrar jugador..."
+      autocomplete="off"
+    >
+  </header>
+
+  <div class="players-table-wrap">
+    <table class="players-table">
+      <thead>
+        <tr>
+          <th>Estado</th>
+          <th>Jugador</th>
+          <th>Modo</th>
+          <th>Rango</th>
+          <th>Mundo</th>
+          <th>Vida</th>
+          <th>Comida</th>
+          <th>Coordenadas</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody id="players-tbody">
+        <tr>
+          <td colspan="9">Cargando...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -1,17 +1,12 @@
-const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { Rcon } = require("rcon-client");
-
-const websocket = require("../websocket");
-
-const rconConnections = new Map();
-
-let currentServer = null;
-let mcRunning = false;
 
 function getLatestLogPath(server) {
-  return path.join(server.path, "logs", "latest.log");
+  return path.join(
+    server.path,
+    "logs",
+    "latest.log"
+  );
 }
 
 function getConsoleHistoryPath(server) {
@@ -31,10 +26,15 @@ function getPanelConsolePath(server) {
 }
 
 function ensureMinecontrolData(server) {
-  const dir = path.join(server.path, "minecontrol-data");
+  const dir = path.join(
+    server.path,
+    "minecontrol-data"
+  );
 
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, {
+      recursive: true
+    });
   }
 }
 
@@ -50,24 +50,10 @@ function readLastLines(filePath, maxLines) {
     .slice(-maxLines);
 }
 
-function appendPanelConsole(server, text) {
-  ensureMinecontrolData(server);
-
-  const now = new Date();
-
-  const time =
-    now.toTimeString().split(" ")[0];
-
-  const line = `[${time}] [MineControlPanel/RCON]: ${text}\n`;
-
-  fs.appendFileSync(
-    getPanelConsolePath(server),
-    line,
-    "utf8"
-  );
-}
 function parseMinecraftLogDate(line) {
-  const match = line.match(/^\[(\d{2}):(\d{2}):(\d{2})\]/);
+  const match = line.match(
+    /^\[(\d{2}):(\d{2}):(\d{2})\]/
+  );
 
   if (!match) {
     return null;
@@ -81,45 +67,39 @@ function parseMinecraftLogDate(line) {
     now.getDate(),
     Number(match[1]),
     Number(match[2]),
-    Number(match[3]),
-    0
+    Number(match[3])
   );
 
-  if (lineDate.getTime() > now.getTime() + 60000) {
-    lineDate.setDate(lineDate.getDate() - 1);
+  if (
+    lineDate.getTime() >
+    now.getTime() + 60000
+  ) {
+    lineDate.setDate(
+      lineDate.getDate() - 1
+    );
   }
 
   return lineDate.getTime();
 }
 
-function parsePanelLogDate(line) {
-  return parseMinecraftLogDate(line);
-}
-
 function normalizeConsoleLine(line) {
-  const panelTime = parsePanelLogDate(line);
-
-  if (panelTime !== null) {
-    return {
-      time: panelTime,
-      line
-    };
-  }
-
-  const minecraftTime = parseMinecraftLogDate(line);
-
   return {
-    time: minecraftTime ?? 0,
+    time:
+      parseMinecraftLogDate(line) ?? 0,
     line
   };
 }
 
 function readConsole(server) {
-  const latestLogPath = getLatestLogPath(server);
-  const panelConsolePath = getPanelConsolePath(server);
+  const latestLines = readLastLines(
+    getLatestLogPath(server),
+    300
+  );
 
-  const latestLines = readLastLines(latestLogPath, 300);
-  const panelLines = readLastLines(panelConsolePath, 150);
+  const panelLines = readLastLines(
+    getPanelConsolePath(server),
+    150
+  );
 
   return [
     ...latestLines,
@@ -132,7 +112,28 @@ function readConsole(server) {
     .join("\n");
 }
 
-function saveCommandHistory(server, command) {
+function appendPanelConsole(
+  server,
+  text
+) {
+  ensureMinecontrolData(server);
+
+  const time =
+    new Date()
+      .toTimeString()
+      .split(" ")[0];
+
+  fs.appendFileSync(
+    getPanelConsolePath(server),
+    `[${time}] [MineControlPanel] ${text}\n`,
+    "utf8"
+  );
+}
+
+function saveCommandHistory(
+  server,
+  command
+) {
   ensureMinecontrolData(server);
 
   fs.appendFileSync(
@@ -142,113 +143,6 @@ function saveCommandHistory(server, command) {
   );
 }
 
-async function getRconConnection(server) {
-  if (!server?.rcon?.enabled) {
-    throw new Error("RCON no está configurado para este servidor");
-  }
-
-  const existingConnection = rconConnections.get(server.id);
-
-  if (existingConnection) {
-    return existingConnection;
-  }
-
-  const connection = await Rcon.connect({
-    host: server.rcon.host || "127.0.0.1",
-    port: Number(server.rcon.port),
-    password: server.rcon.password
-  });
-
-  rconConnections.set(server.id, connection);
-
-  connection.on("end", () => {
-    rconConnections.delete(server.id);
-  });
-
-  connection.on("error", () => {
-    rconConnections.delete(server.id);
-  });
-
-  return connection;
-}
-
-async function sendCommand(server, command) {
-  const connection = await getRconConnection(server);
-
-  appendPanelConsole(server, `[MCP >] ${command}`);
-
-  const response = await connection.send(command);
-
-  if (response) {
-    appendPanelConsole(server, `[MCP <] ${response}`);
-  }
-
-  saveCommandHistory(server, command);
-
-  return response;
-}
-async function checkConnection(server) {
-  const connection = await getRconConnection(server);
-
-  return true;
-}
-function startServer(server) {
-  if (mcRunning) {
-    throw new Error("El servidor ya está iniciado");
-  }
-
-  if (!server || !server.path || !server.jar) {
-    throw new Error("Faltan path o jar del servidor");
-  }
-
-  const jarPath = path.join(server.path, server.jar);
-
-  if (!fs.existsSync(jarPath)) {
-    throw new Error(`No existe el jar: ${jarPath}`);
-  }
-
-  const child = spawn("java", ["-jar", server.jar], {
-    cwd: server.path,
-    detached: true,
-    stdio: "ignore",
-    windowsHide: true
-  });
-
-  child.unref();
-
-  currentServer = server;
-  mcRunning = true;
-
-  websocket.broadcastConsole(
-    `Servidor iniciado de forma independiente: ${server.name}\n`
-  );
-
-  return true;
-}
-
-function stopServer() {
-  throw new Error("Usa el comando RCON stop");
-}
-
-function restartServer() {
-  throw new Error("Usa stop por RCON y luego vuelve a iniciar el servidor");
-}
-
-function isRunning() {
-  return mcRunning;
-}
-
-function getCurrentServer() {
-  return currentServer;
-}
-async function checkRcon(server) {
-  const response = await sendCommand(server, "list");
-
-  return {
-    online: true,
-    response
-  };
-}
 function clearPanelConsole(server) {
   ensureMinecontrolData(server);
 
@@ -258,17 +152,10 @@ function clearPanelConsole(server) {
     "utf8"
   );
 }
+
 module.exports = {
-  checkConnection,
-  startServer,
-  stopServer,
-  restartServer,
-  sendCommand,
-  checkRcon,
   readConsole,
-  isRunning,
-  getCurrentServer,
-  readConsole,
-  sendCommand,
+  appendPanelConsole,
+  saveCommandHistory,
   clearPanelConsole
 };

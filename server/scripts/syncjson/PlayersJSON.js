@@ -1,27 +1,118 @@
 const fs = require("fs");
 const nbt = require("prismarine-nbt");
 
+const minecraft = require("../minecraft");
+
 const {
   getServerPaths,
   ensureMinecontrolPath
 } = require("../serverPaths");
 
-function readJsonSafe(filePath, fallback = []) {
-  try {
-    if (!fs.existsSync(filePath)) {
-      return fallback;
-    }
+function readJson(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return [];
+  }
 
+  try {
     return JSON.parse(
       fs.readFileSync(filePath, "utf8")
     );
   } catch {
-    return fallback;
+    return [];
+  }
+}
+
+function writeJson(filePath, data) {
+  fs.writeFileSync(
+    filePath,
+    JSON.stringify(data, null, 2),
+    "utf8"
+  );
+}
+
+async function readPlayerDat(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const { parsed } = await nbt.parse(buffer);
+
+  return nbt.simplify(parsed);
+}
+
+function parseList(text) {
+  if (!text || !text.includes(":")) {
+    return [];
+  }
+
+  return text
+    .split(":")
+    .slice(1)
+    .join(":")
+    .split(",")
+    .map(name => name.trim())
+    .filter(Boolean);
+}
+
+function parseNumber(text) {
+  const match = String(text).match(
+    /-?\d+(\.\d+)?/
+  );
+
+  return match ? Number(match[0]) : null;
+}
+
+function parseCoords(text) {
+  const numbers = String(text).match(
+    /-?\d+(\.\d+)?/g
+  );
+
+  if (!numbers || numbers.length < 3) {
+    return null;
+  }
+
+  return {
+    x: Math.round(Number(numbers[0])),
+    y: Math.round(Number(numbers[1])),
+    z: Math.round(Number(numbers[2]))
+  };
+}
+
+function mapCoords(pos) {
+  if (!Array.isArray(pos) || pos.length < 3) {
+    return null;
+  }
+
+  return {
+    x: Math.round(pos[0]),
+    y: Math.round(pos[1]),
+    z: Math.round(pos[2])
+  };
+}
+
+function parseDimension(text) {
+  const match = String(text).match(
+    /minecraft:[a-z_]+/
+  );
+
+  return match ? match[0] : null;
+}
+
+function mapDimension(dimension) {
+  switch (dimension) {
+    case "minecraft:overworld":
+      return "world";
+
+    case "minecraft:the_nether":
+      return "world_nether";
+
+    case "minecraft:the_end":
+      return "world_the_end";
+
+    default:
+      return dimension || null;
   }
 }
 
 function mapGamemode(id) {
-  switch (id) {
+  switch (Number(id)) {
     case 0:
       return "Survival";
 
@@ -39,244 +130,162 @@ function mapGamemode(id) {
   }
 }
 
-function mapDimension(dim) {
-  switch (dim) {
-    case "minecraft:overworld":
-      return "world";
+async function getOnlineNames(server) {
+  const response = await minecraft.sendSilentCommand(
+    server,
+    "list"
+  );
 
-    case "minecraft:the_nether":
-      return "world_nether";
+  return parseList(response);
+}
 
-    case "minecraft:the_end":
-      return "world_the_end";
+async function getLivePlayerData(server, name) {
+  const [
+    health,
+    food,
+    pos,
+    dimension,
+    gamemode
+  ] = await Promise.all([
+    minecraft.sendSilentCommand(
+      server,
+      `data get entity ${name} Health`
+    ),
 
-    default:
-      return dim || null;
+    minecraft.sendSilentCommand(
+      server,
+      `data get entity ${name} foodLevel`
+    ),
+
+    minecraft.sendSilentCommand(
+      server,
+      `data get entity ${name} Pos`
+    ),
+
+    minecraft.sendSilentCommand(
+      server,
+      `data get entity ${name} Dimension`
+    ),
+
+    minecraft.sendSilentCommand(
+      server,
+      `data get entity ${name} playerGameType`
+    )
+  ]);
+
+  return {
+    online: true,
+    vida: parseNumber(health),
+    comida: parseNumber(food),
+    coordenadas: parseCoords(pos),
+    mundo: mapDimension(parseDimension(dimension)),
+    gamemode: mapGamemode(parseNumber(gamemode))
+  };
+}
+
+function getDatPlayerData(data) {
+  return {
+    vida:
+      typeof data.Health === "number"
+        ? data.Health
+        : null,
+
+    comida:
+      typeof data.foodLevel === "number"
+        ? data.foodLevel
+        : null,
+
+    coordenadas: mapCoords(data.Pos),
+
+    mundo: mapDimension(data.Dimension),
+
+    gamemode: mapGamemode(data.playerGameType)
+  };
+}
+function getPlayerRango(ops, uuid) {
+  const op = ops.find(item => item.uuid === uuid);
+
+  if (!op) {
+    return "Jugador";
   }
+
+  return "Operador";
 }
-
-function mapOpLevelToRango(level) {
-  switch (level) {
-    case 4:
-      return "Operador";
-
-    default:
-      return "Jugador";
-  }
-}
-
-async function readPlayerDat(filePath) {
-  const buffer = fs.readFileSync(filePath);
-
-  const { parsed } = await nbt.parse(buffer);
-
-  return nbt.simplify(parsed);
-}
-
-async function syncPlayers(server) {
+async function updatePlayersJson(server) {
   const paths = getServerPaths(server);
 
   ensureMinecontrolPath(server);
 
-  if (!fs.existsSync(paths.playerdata)) {
-    fs.writeFileSync(
-      paths.playersJson,
-      "[]",
-      "utf8"
-    );
+  const players = [];
 
-    return [];
+  if (!fs.existsSync(paths.playerdata)) {
+    writeJson(paths.playersJson, players);
+    return players;
   }
 
-  const usercache = readJsonSafe(
-    paths.usercache,
-    []
-  );
-
-  const ops = readJsonSafe(
-    paths.ops,
-    []
-  );
-
-  const usercacheMap = new Map(
-    usercache.map(user => [
-      user.uuid,
-      user.name
-    ])
-  );
-
-  const opsMap = new Map(
-    ops.map(op => [
-      op.uuid,
-      op
-    ])
-  );
+  const usercache = readJson(paths.usercache);
+  const ops = readJson(paths.ops);
+  const onlineNames = await getOnlineNames(server)
+    .catch(() => []);
 
   const files = fs
     .readdirSync(paths.playerdata)
-    .filter(file =>
-      file.endsWith(".dat")
-    );
-
-  const players = [];
+    .filter(file => file.endsWith(".dat"));
 
   for (const file of files) {
-    const uuid = file.replace(
-      ".dat",
-      ""
+    const uuid = file.replace(".dat", "");
+
+    const user = usercache.find(
+      item => item.uuid === uuid
     );
 
-    const filePath = `${paths.playerdata}/${file}`;
+    const name = user?.name || "Unknown";
+    const online = onlineNames.includes(name);
 
-    try {
-      const data = await readPlayerDat(
-        filePath
-      );
+    let player = {
+      uuid,
+      name,
+      online,
+      rango: getPlayerRango(ops, uuid),
+      vida: null,
+      comida: null,
+      mundo: null,
+      gamemode: null,
+      coordenadas: null
+    };
 
-      const opData = opsMap.get(uuid);
+    if (online) {
+      try {
+        player = {
+          ...player,
+          ...(await getLivePlayerData(server, name))
+        };
+      } catch {
+        player.online = true;
+      }
+    } else {
+      try {
+        const data = await readPlayerDat(
+          `${paths.playerdata}/${file}`
+        );
 
-      const opLevel =
-        opData?.level ?? 0;
-
-      const pos = Array.isArray(
-        data.Pos
-      )
-        ? data.Pos
-        : [null, null, null];
-
-      const deathPos =
-        data.LastDeathLocation?.pos ||
-        [null, null, null];
-
-      players.push({
-        uuid,
-
-        name:
-          usercacheMap.get(uuid) ||
-          "Unknown",
-
-        online: false,
-
-        gamemode: mapGamemode(
-          data.playerGameType
-        ),
-
-        rango:
-          mapOpLevelToRango(
-            opLevel
-          ),
-
-        mundo: mapDimension(
-          data.Dimension
-        ),
-
-        vida:
-          typeof data.Health ===
-          "number"
-            ? data.Health
-            : null,
-
-        comida:
-          typeof data.foodLevel ===
-          "number"
-            ? data.foodLevel
-            : null,
-
-        coordenadas: {
-          x:
-            pos[0] !== null
-              ? Math.round(pos[0])
-              : null,
-
-          y:
-            pos[1] !== null
-              ? Math.round(pos[1])
-              : null,
-
-          z:
-            pos[2] !== null
-              ? Math.round(pos[2])
-              : null
-        },
-
-        respawn:
-          data.SpawnX !== undefined &&
-          data.SpawnY !== undefined &&
-          data.SpawnZ !== undefined
-            ? {
-                mundo:
-                  mapDimension(
-                    data.SpawnDimension ||
-                    "minecraft:overworld"
-                  ),
-
-                x: data.SpawnX,
-                y: data.SpawnY,
-                z: data.SpawnZ
-              }
-            : null,
-
-        ultimaMuerte:
-          data.LastDeathLocation
-            ? {
-                mundo:
-                  mapDimension(
-                    data
-                      .LastDeathLocation
-                      .dimension
-                  ),
-
-                x:
-                  deathPos[0] ??
-                  null,
-
-                y:
-                  deathPos[1] ??
-                  null,
-
-                z:
-                  deathPos[2] ??
-                  null,
-
-                causa: null,
-                fecha: null
-              }
-            : null
-      });
-    } catch (err) {
-      console.error(
-        `Error leyendo ${file}: ${err.message}`
-      );
+        player = {
+          ...player,
+          ...getDatPlayerData(data)
+        };
+      } catch {
+        // Si falla el .dat, deja los datos en null.
+      }
     }
+
+    players.push(player);
   }
 
-  fs.writeFileSync(
-    paths.playersJson,
-    JSON.stringify(
-      players,
-      null,
-      2
-    ),
-    "utf8"
-  );
-
-  console.log(
-    `[${server.name}] players.json actualizado`
-  );
+  writeJson(paths.playersJson, players);
 
   return players;
 }
 
-function getPlayers(server) {
-  const paths = getServerPaths(server);
-
-  return readJsonSafe(
-    paths.playersJson,
-    []
-  );
-}
-
 module.exports = {
-  syncPlayers,
-  getPlayers
+  updatePlayersJson
 };

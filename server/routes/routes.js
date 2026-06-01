@@ -14,7 +14,7 @@ const {
   getAllCachedStatuses
 } = require("../scripts/statusMonitor");
 const {
-  syncPlayers
+  updatePlayersJson
 } = require("../scripts/syncjson/PlayersJSON");
 
 const {
@@ -229,24 +229,21 @@ router.get("/api/servers/:id/players", async (req, res) => {
 
     if (!server) {
       return res.status(404).json({
-        success: false,
         error: "Servidor no encontrado"
       });
     }
 
-    const players = await syncPlayers(server);
+    const players = await updatePlayersJson(server);
 
     res.json(players);
-
   } catch (error) {
-    handleError(
-      res,
-      error,
-      "No se pudieron obtener los jugadores"
-    );
+    console.error("Error /players:", error);
+
+    res.status(500).json({
+      error: error.message
+    });
   }
 });
-
 // =========================
 // MUNDOS
 // =========================

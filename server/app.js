@@ -22,6 +22,10 @@ app.use("/sections", express.static(
   path.join(__dirname, "../client/sections")
 ));
 
+app.use("/img", express.static(
+  path.join(__dirname, "../client/img")
+));
+
 // API
 app.use(routes);
 
