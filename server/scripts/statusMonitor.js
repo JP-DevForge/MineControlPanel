@@ -208,6 +208,16 @@ async function monitorOnce() {
         servers
       );
 
+    if (
+      current.online &&
+      current.version &&
+      current.version !== server.version
+    ) {
+      serversJSON.updateServer(server.id, {
+        version: current.version
+      });
+    }
+
     statusCache.set(server.id, {
       serverId: server.id,
 
@@ -218,7 +228,7 @@ async function monitorOnce() {
 
       players: current.players,
 
-      version: current.version,
+      version: current.version || server.version || null,
       latency: current.latency,
 
       reason: current.reason,

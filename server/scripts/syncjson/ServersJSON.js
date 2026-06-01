@@ -45,6 +45,7 @@ function addServer(data) {
   const server = {
     id: crypto.randomUUID(),
     type: data.type || "local",
+    version: data.version || null,
     name: data.name,
     path: data.path,
     jar: data.jar,

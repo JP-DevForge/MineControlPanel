@@ -74,8 +74,9 @@ async function sendCommand(server, command) {
     throw new Error("Comando vacío");
   }
 
-  const connection = await getRconConnection(server);
+  assertCanTryRcon(server);
 
+  const connection = await getRconConnection(server);
   const cleanCommand = command.trim();
 
   minecraftConsole.appendPanelConsole(
@@ -104,6 +105,8 @@ async function sendSilentCommand(server, command) {
   if (!command || !command.trim()) {
     throw new Error("Comando vacío");
   }
+
+  assertCanTryRcon(server);
 
   const connection = await getRconConnection(server);
 
@@ -148,7 +151,20 @@ async function startServer(server) {
 
   return true;
 }
+function canTryRcon(server) {
+  const statusMonitor = require("./statusMonitor");
+  const cached = statusMonitor.getCachedStatus(server.id);
 
+  const status = cached?.status || "unknown";
+
+  return !["offline", "stopped"].includes(status);
+}
+
+function assertCanTryRcon(server) {
+  if (!canTryRcon(server)) {
+    throw new Error("El servidor está apagado");
+  }
+}
 module.exports = {
   startServer,
   sendCommand,
