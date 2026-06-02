@@ -1,17 +1,18 @@
+require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 
 const routes = require("./routes/routes");
+const auth = require("./scripts/auth");
 const setupSpaRoutes = require("./routes/spaRoutes");
 
 const app = express();
-require("dotenv").config();
 
-const cookieParser = require("cookie-parser");
-const auth = require("./scripts/auth");
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Frontend estático
 app.use("/css", express.static(
@@ -30,8 +31,10 @@ app.use("/img", express.static(
   path.join(__dirname, "../client/img")
 ));
 
-// API
+// Auth antes de la API
 app.use(auth.requireAuth);
+
+// API
 app.use(routes);
 
 // SPA

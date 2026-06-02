@@ -404,3 +404,67 @@ body {
   min-height: 2rem;
   color: #bdefff;
 }
+.auth-card input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+
+    color: white;
+    background: rgba(0, 0, 0, 0.4);
+
+    border: 1px solid #00d4ff;
+    border-radius: 0.6rem;
+
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.auth-card input:focus {
+    outline: none;
+
+    border-color: #00d4ff;
+
+    box-shadow:
+        0 0 0.5rem rgba(0, 212, 255, 0.6);
+}
+
+
+#logout-button {
+    width: 3rem;
+    height: 3rem;
+
+    padding: 0;
+
+    color: white;
+    background: rgba(0, 0, 0, 0.4);
+
+    border: 1px solid #00d4ff;
+    border-radius: 0.8rem;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.2rem;
+
+    transition:
+        background 0.2s,
+        border-color 0.2s;
+}
+
+#logout-button:hover {
+    color: white;
+
+    background: rgba(255, 80, 80, 0.15);
+
+    border-color: #ff5050;
+}
+
+#logout-button:active {
+    transform: translateY(0);
+}
+#logout-button svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}

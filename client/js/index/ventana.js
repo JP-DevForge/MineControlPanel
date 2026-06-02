@@ -2,7 +2,9 @@ import { loadSection } from "./selection.js";
 import { renderServers } from "./serverlist.js";
 import { addLocalServer } from "./botones.js";
 import { initCreateServer } from "./createServer.js";
+  import { logout } from "../auth.js";
 export async function renderHome() {
+
   if (!await loadSection("selector", "home")) {
     return;
   }
@@ -14,8 +16,11 @@ export async function renderHome() {
   document
     .getElementById("open-create-server")
     ?.addEventListener("click", showCreateServerScreen);
-
+  document
+    .getElementById("logout-button")
+    ?.addEventListener("click", logout);
   renderServers();
+
 }
 
 export async function showAddLocalServerForm() {

@@ -1,3 +1,3 @@
-import { renderHome } from "./ventana.js";
+import { initAuth } from "../auth.js";
 
-document.addEventListener("DOMContentLoaded", renderHome);
+document.addEventListener("DOMContentLoaded", initAuth);

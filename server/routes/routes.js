@@ -69,8 +69,20 @@ router.get("/api/test", (req, res) => {
   });
 });
 // =========================
-// Autenticacion
+// AUTENTICACIÓN
 // =========================
+
+function setAuthCookie(res) {
+  const token = auth.createToken();
+
+  res.cookie("mcp_token", token, {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: false,
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+}
+
 router.get("/api/auth/status", (req, res) => {
   res.json({
     success: true,
@@ -80,65 +92,75 @@ router.get("/api/auth/status", (req, res) => {
 
 router.post("/api/auth/setup", (req, res) => {
   try {
+    if (auth.isConfigured()) {
+      return res.status(400).json({
+        success: false,
+        error: "El panel ya está configurado"
+      });
+    }
+
     const { password } = req.body;
 
     auth.setup(password);
+    setAuthCookie(res);
 
-    const token = auth.createToken();
-
-    res.cookie("mcp_token", token, {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: false,
-      maxAge: 7 * 24 * 60 * 60 * 1000
+    res.json({
+      success: true
     });
-
-    res.json({ success: true });
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message
+      error: error.message || "Error configurando autenticación"
     });
   }
 });
 
 router.post("/api/auth/login", (req, res) => {
-  const { password } = req.body;
+  try {
+    if (!auth.isConfigured()) {
+      return res.status(400).json({
+        success: false,
+        error: "El panel todavía no está configurado"
+      });
+    }
 
-  if (!auth.isConfigured()) {
-    return res.status(400).json({
+    const { password } = req.body;
+
+    const valid = auth.verifyPassword(
+      password,
+      process.env.PANEL_PASSWORD_HASH
+    );
+
+    if (!valid) {
+      return res.status(401).json({
+        success: false,
+        error: "Contraseña incorrecta"
+      });
+    }
+
+    setAuthCookie(res);
+
+    res.json({
+      success: true
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      error: "El panel todavía no está configurado"
+      error: "Error iniciando sesión"
     });
   }
-
-  const valid = auth.verifyPassword(
-    password,
-    process.env.PANEL_PASSWORD_HASH
-  );
-
-  if (!valid) {
-    return res.status(401).json({
-      success: false,
-      error: "Contraseña incorrecta"
-    });
-  }
-
-  const token = auth.createToken();
-
-  res.cookie("mcp_token", token, {
-    httpOnly: true,
-    sameSite: "strict",
-    secure: false,
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
-
-  res.json({ success: true });
 });
 
 router.post("/api/auth/logout", (req, res) => {
-  res.clearCookie("mcp_token");
-  res.json({ success: true });
+  res.clearCookie("mcp_token", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: false
+  });
+
+  res.json({
+    success: true
+  });
 });
 // =========================
 // SERVIDORES GUARDADOS

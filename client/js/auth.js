@@ -1,5 +1,5 @@
 import { loadSection } from "./index/selection.js";
-import { renderHome } from "./ventana.js";
+import { renderHome } from "./index/ventana.js";
 
 let authMode = "login";
 
@@ -98,4 +98,15 @@ export async function initAuth() {
 
   authMode = "login";
   await renderAuth();
+}
+export async function logout() {
+  try {
+    await fetch("/api/auth/logout", {
+      method: "POST"
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+  location.reload();
 }
