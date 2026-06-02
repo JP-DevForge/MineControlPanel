@@ -1,66 +1,18 @@
 [
   {
-    "id": "2a5d1115-e299-427c-8a1f-afe5c5e0128b",
+    "id": "e272d2bc-f0dd-46ff-97d6-cc1ec4429b09",
     "type": "local",
-    "name": "otro mas",
-    "path": "/home/ponce/s",
+    "name": "Proyecto Intermodular",
+    "path": "/home/ponce/Proyecto Intermodular/",
     "jar": "server.jar",
     "port": 25565,
-    "version": null,
+    "version": "1.21.11",
     "rcon": {
       "enabled": true,
       "host": "127.0.0.1",
       "port": 25575,
-      "password": "V-RRgGRlS3Fwgdh7dlq7T4Zm"
+      "password": "smTH2uPk7sgzj-wVm6j7461W"
     },
-    "createdAt": "2026-06-01T21:43:03.058Z"
-  },
-  {
-    "id": "2a42c5e0-407b-4ee9-a407-05dcc0954b3c",
-    "type": "local",
-    "name": "server",
-    "path": "/home/ponce/Multimedia/Instituto/Proyecto Intermodular/server/",
-    "jar": "server.jar",
-    "port": 25565,
-    "version": "Paper 1.21.11",
-    "rcon": {
-      "enabled": true,
-      "host": "127.0.0.1",
-      "port": 25575,
-      "password": "vKacx0VKE-EhRYIzmJawTwr-"
-    },
-    "createdAt": "2026-06-01T21:45:31.682Z"
-  },
-  {
-    "id": "f95efe43-2048-4b2a-9fee-032cfbece9a2",
-    "type": "local",
-    "name": "otro mas",
-    "path": "/home/ponce/s1",
-    "jar": "server.jar",
-    "port": 25565,
-    "version": "26.1.2",
-    "rcon": {
-      "enabled": true,
-      "host": "127.0.0.1",
-      "port": 25575,
-      "password": "bwdrkgXknzHZ39zW0xai19gE"
-    },
-    "createdAt": "2026-06-01T21:56:17.278Z"
-  },
-  {
-    "id": "d9f29234-2564-4c6a-be7b-7c8b4b8f54f0",
-    "type": "local",
-    "name": "Ies",
-    "path": "/home/ponce/user",
-    "jar": "server.jar",
-    "port": 25565,
-    "version": "26.1.2",
-    "rcon": {
-      "enabled": true,
-      "host": "127.0.0.1",
-      "port": 25575,
-      "password": "EDbAx-hTsm6WbkRqujn3XxBt"
-    },
-    "createdAt": "2026-06-01T22:00:28.613Z"
+    "createdAt": "2026-06-02T01:15:15.399Z"
   }
 ]

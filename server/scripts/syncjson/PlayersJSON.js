@@ -52,13 +52,16 @@ function parseList(text) {
 }
 
 function parseNumber(text) {
-  const match = String(text).match(
-    /-?\d+(\.\d+)?/
+  const matches = String(text).match(
+    /-?\d+(\.\d+)?/g
   );
 
-  return match ? Number(match[0]) : null;
-}
+  if (!matches?.length) {
+    return null;
+  }
 
+  return Number(matches[matches.length - 1]);
+}
 function parseCoords(text) {
   const numbers = String(text).match(
     /-?\d+(\.\d+)?/g
